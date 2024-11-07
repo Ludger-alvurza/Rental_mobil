@@ -1,14 +1,14 @@
 @extends('layout.main')
-@section('judul','Pemesanan Motor')
+@section('judul', 'Pemesanan Motor')
 @section('content')
 
     <div class="row">
         <div class="col-12">
-            <input type="text" id="input-barcode" name="barcode"
-                   class="form-control" placeholder="masukan nomor plat kendaraan"/>
+            <input type="text" id="input-barcode" name="barcode" class="form-control"
+                placeholder="masukan nomor plat kendaraan" />
         </div>
     </div>
-    <form method="post" action="{{url('/app/insert')}}">
+    <form method="post" action="{{ url('/app/insert') }}">
         <div class="row">
             @csrf
             <div class="col-12 mt-3">
@@ -16,20 +16,23 @@
                     <div class="card-body">
                         <table class="table" id="table-cart">
                             <thead>
-                            <tr>
-                                <th>Plat</th>
-                                <th>Nama</th>
-                                <th>Harga sewa</th>
-                                <th>Lama Sewa</th>
-                                <th>Total Harga Sewa</th>
-                                <th>denda <br>1 jam</th>
-                                <th>denda <br>3 jam</th>
-                                <th>denda <br>5 jam</th>
-                                <th>denda <br>1 hari</th>
-                            </tr>
+                                <tr>
+                                    <th>Plat</th>
+                                    <th>Nama</th>
+                                    <th>Harga sewa</th>
+                                    <th>Lama Sewa</th>
+                                    <th>Total Harga Sewa</th>
+                                    <th>denda <br>1 jam</th>
+                                    <th>denda <br>3 jam</th>
+                                    <th>denda <br>5 jam</th>
+                                    <th>denda <br>1 hari</th>
+                                    <th>Input ID Booking</th>
+                                </tr>
                             </thead>
                             <tbody>
-
+                                <tr>
+                                    
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -40,26 +43,25 @@
                     <div class="card-body">
                         <table width="100%">
                             </tr>
-                                <td>
-                                    <label for="">Harga Sewa Perhari</label>
-                                    <input type="text" readonly name="subtotal" id="subtotal" 
-                                        class="form-control text-right">
-                                </td>
+                            <td>
+                                <label for="">Harga Sewa Perhari</label>
+                                <input type="text" readonly name="subtotal" id="subtotal"
+                                    class="form-control text-right">
+                            </td>
                             </tr>
                             </tr>
-                                <td >
-                                    <label for="">Hitungan Kurang Dari 24 jam Sewa (%)</label>
-                                    <input type="number" min="0" max="100" name="discount" id="discount" 
-                                        class="form-control text-right"
-                                        value='0'>
-                                </td>
+                            <td>
+                                <label for="">Hitungan Kurang Dari 24 jam Sewa (%)</label>
+                                <input type="number" min="0" max="100" name="discount" id="discount"
+                                    class="form-control text-right" value='0'>
+                            </td>
                             </tr>
                             </tr>
-                                <td >
-                                    <label for="">Total</label>
-                                    <input type="text" readonly name="total" id="total" 
-                                        class="form-control text-right">
-                                </td>
+                            <td>
+                                <label for="">Total</label>
+                                <input type="text" readonly name="total" id="total"
+                                    class="form-control text-right">
+                            </td>
                         </table>
                     </div>
                     <div class="card-footer">
@@ -74,8 +76,8 @@
 
 @push('js')
     <script>
-        $(function () {
-            $('#input-barcode').on('keypress', function (e) {
+        $(function() {
+            $('#input-barcode').on('keypress', function(e) {
                 if (e.which === 13) {
                     console.log('Enter di klik');
                     //pencarian data via ajax
@@ -83,16 +85,16 @@
                         url: '/app/search-barcode',
                         type: 'POST',
                         data: {
-                            _token: '{{csrf_token()}}',
+                            _token: '{{ csrf_token() }}',
                             no_plat: $(this).val()
                         },
-                        success: function (data) {
+                        success: function(data) {
                             addProductToTable(data);
                             toastr.success('Detail Rental berhasil ditambahkan', 'Berhasil');
                             $('#input-barcode').val('');
 
                         },
-                        error: function () {
+                        error: function() {
                             toastr.error('nomor Plat yang dicari tidak ditemukan', 'Error');
                             $('#input-barcode').val('');
                         }
@@ -137,6 +139,7 @@
                     row += `<td>${denda1}</td>`;
                     row += `<td>${denda2}</td>`;
                     row += `<td>${denda3}</td>`;
+                    row += `<td><input type='number' name='id_booking[]' class='id_booking' /></td>`;
                     row += `</tr>`;
                     $('#table-cart tbody').append(row);
                 }
@@ -145,10 +148,11 @@
 
             function hitungTotalBelanja() {
                 let subtotal = 0;
-                $.each($('.price'), function (index, obj) {
+                $.each($('.price'), function(index, obj) {
                     let price_per_hour = $(this).val(); // Ubah menjadi harga per jam
                     let qty = $('.qty').eq(index).val();
-                    subtotal += parseInt(price_per_hour) * parseInt(qty); // Hitung subtotal berdasarkan harga per jam dan jumlah jam sewa
+                    subtotal += parseInt(price_per_hour) * parseInt(
+                    qty); // Hitung subtotal berdasarkan harga per jam dan jumlah jam sewa
                     console.log(price_per_hour, qty);
                 });
                 let discount = parseInt($('#discount').val());
@@ -157,11 +161,12 @@
                 $('#total').val(total);
             }
 
-            $('#discount').on('change',function() {
+            $('#discount').on('change', function() {
                 hitungTotalBelanja();
             })
 
         });
+
         function hitungDenda(telat) {
             let denda = 0;
             const denda_1_jam = 5000;

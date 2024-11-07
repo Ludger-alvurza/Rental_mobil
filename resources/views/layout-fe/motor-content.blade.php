@@ -39,7 +39,20 @@
                                     <img src="{{ route('storage', $row->gambar) }}" alt="{{ $row->name }}">
                                 </div>
                                 <h3 class="types_text">{{ $row->name }} <br>{{ $row->availability }}</h3>
-                                <p class="looking_text">Start per day Rp.{{ $row->price_per_day }}</p>
+                                <p class="looking_text">Start per day Rp {{ number_format($row->price_per_day, 0, ',', '.') }}</p>
+                                <p style="font-family: 'Arial', sans-serif; font-size: 16px; color: black;">
+                                    {{ number_format($row->avg_rating, 1) }}
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($row->avg_rating >= $i)
+                                            <span style="color: gold;">★</span> <!-- Bintang penuh warna kuning -->
+                                        @elseif ($row->avg_rating >= $i - 0.5)
+                                            <span style="color: gold;">☆</span> <!-- Bintang setengah warna kuning -->
+                                        @else
+                                            <span style="color: gray;">☆</span> <!-- Bintang kosong warna abu -->
+                                        @endif
+                                    @endfor
+                                    <span style="font-weight:">({{ $row->total_ratings }})</span>
+                                </p>                                
                                 <div class="read_bt">
                                     @if ($row->availability == 'Tersedia')
                                         <a href="#" data-bs-toggle="modal"
@@ -148,6 +161,28 @@
                                                     </div>
                                                 @enderror
                                             </div>
+                                            <div class="form-group">
+                                                <label for="booking_start">Tanggal Mulai Sewa</label>
+                                                <input type="date"
+                                                    class="form-control @error('booking_start') is-invalid @enderror"
+                                                    value="{{ old('booking_start', $row->booking_start) }}" name="booking_start" required>
+                                                @error('booking_start')
+                                                    <div class="invalid-feedback">
+                                                        {{ $message }}
+                                                    </div>
+                                                @enderror
+                                            </div> 
+                                            <div class="form-group">
+                                                <label for="booking_end">Tanggal Akhir Sewa</label>
+                                                <input type="date"
+                                                    class="form-control @error('booking_end') is-invalid @enderror"
+                                                    value="{{ old('booking_end', $row->booking_end) }}" name="booking_end" required>
+                                                @error('booking_end')
+                                                    <div class="invalid-feedback">
+                                                        {{ $message }}
+                                                    </div>
+                                                @enderror
+                                            </div>                                            
                                             <div class="form-group">
                                                 <label for="">Keterangan</label>
                                                 <textarea type="text" class="form-control @error('keterangan') is-invalid @enderror"

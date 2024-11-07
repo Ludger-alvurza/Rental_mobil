@@ -3,11 +3,41 @@
 
 @section('content')
 <div class="col-12 mt-3">
-    <form action="{{ route('table.clear') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua data transaksi?');">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="btn btn-danger">Hapus Semua Data Transaksi</button>
-    </form>
+    <button type="button" class="btn btn-danger" onclick="showConfirmationModal()">Hapus Semua Data</button>
+
+    <!-- Modal Konfirmasi -->
+    <div id="confirmationModal" style="display: none;">
+        <div class="modal-overlay" onclick="closeConfirmationModal()"></div>
+        <div class="modal-content">
+            <h3>Konfirmasi Hapus Data</h3>
+            <p>Apakah Anda yakin ingin menghapus semua data ini? Ini akan berpengaruh terhadap pesanan user.</p>
+            <button type="button" class="btn btn-danger" id="delete-all">Ya, Hapus</button>
+            <button type="button" class="btn btn-secondary" onclick="closeConfirmationModal()">Batal</button>
+        </div>
+    </div>
+
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+        }
+    </style>
+</div>
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
@@ -111,46 +141,56 @@
 @endsection
 @push('js')
 <script>
-    $('#delete-all').click(function (e) {
-        e.preventDefault();
-        
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data Transaksi yang dihapus tidak dapat dikembalikan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '{{ route('table.trans') }}',
-                    type: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function (response) {
-                        Swal.fire(
-                            'Terhapus!',
-                            response.success,
-                            'success'
-                        ).then((result) => {
-                            if (result.isConfirmed) {
-                                location.reload();
-                            }
-                        });
-                    },
-                    error: function (response) {
-                        Swal.fire(
-                            'Gagal!',
-                            'Terjadi kesalahan saat menghapus data.',
-                            'error'
-                        );
-                    }
-                });
-            }
+    function showConfirmationModal() {
+        $('#confirmationModal').show();
+    }
+
+    function closeConfirmationModal() {
+        $('#confirmationModal').hide();
+    }
+
+    $(document).ready(function () {
+        $('#delete-all').click(function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data Rincian Biaya yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '{{ route('table.clear') }}',
+                        type: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        success: function (response) {
+                            Swal.fire(
+                                'Terhapus!',
+                                'Data berhasil dihapus.',
+                                'success'
+                            ).then((result) => {
+                                if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload(true); // Force reload from server
+                                }
+                            });
+                        },
+                        error: function () {
+                            Swal.fire(
+                                'Gagal!',
+                                'Terjadi kesalahan saat menghapus data.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
         });
     });
 </script>

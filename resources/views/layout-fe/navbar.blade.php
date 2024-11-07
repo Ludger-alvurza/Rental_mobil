@@ -51,10 +51,10 @@
                     <a class="nav-link" href="{{ url('/logout') }}">Log Out</a>
                 </li>
                 <li class="nav-item {{ Request::is('user/profil') ? 'active' : '' }}">
-                    <a class="nav-link" href="/user/profil">
+                    <a class="nav-link" href="/user/profil" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
                         <i class="fa fa-user"></i> {{ auth()->user()->email }}
                     </a>
-                </li>
+                </li>                
             @endauth
             @can('superadmin')
                 <li class="nav-item {{ Request::is('dashboard') ? 'active' : '' }}">

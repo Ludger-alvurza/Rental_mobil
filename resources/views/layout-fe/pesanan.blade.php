@@ -122,6 +122,8 @@
                                             <th>Tandai Selesai</th>
                                             @endcan
                                             <th>Pembatalan</th>
+                                            <th class="text-center">status pembayaran</th>
+                                            <th>Checkout</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -329,6 +331,24 @@
                                                         </div>
                                                     </div>
                                                 </td>
+                                                <td class="text-center">
+                                                    <span
+                                                        class="badge
+                                                    {{ $row->payment_status == 'Paid' ? 'bg-success' : ($row->payment_status == 'Pending' ? 'bg-warning' : 'bg-danger') }}">
+                                                        {{ $row->payment_status }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    @if($row->pembatalan !== 'Terverifikasi')
+                                                        Pesanan Belum Diproses
+                                                    @elseif($row->payment_status === 'Paid')
+                                                        Pembayaran Sudah Selesai
+                                                    @else
+                                                        <a href="{{ route('checkout', $row->id) }}" class="btn btn-primary">
+                                                            Checkout
+                                                        </a>
+                                                    @endif
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -465,6 +485,11 @@
                 });
             });
         </script>
+        {{-- @if (session::has('warning'))
+            <script>
+                toastr.warning("{{ Session::get('warning') }}");
+            </script>
+        @endif --}}
         @if (Session::has('success'))
             <script>
                 toastr.success("{{ Session::get('success') }}");

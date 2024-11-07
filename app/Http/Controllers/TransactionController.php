@@ -48,6 +48,7 @@ class TransactionController extends Controller
 public function clearTable()
 {
     // Pastikan untuk mengganti 'your_table_name' dengan nama tabel yang ingin Anda hapus
+    DB::table('denda')->truncate();
     DB::table('transactions')->truncate();
 
     return redirect()->back()->with('success', 'Semua data berhasil dihapus!');

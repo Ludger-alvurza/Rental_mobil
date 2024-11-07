@@ -15,17 +15,29 @@ class BookingController extends Controller
 {
 public function index()
 {
-    return view('content.booking.index');
+    $motor = Mobil::with('booking')->first();
+    return view('content.booking.index',compact('motor'));
 }
 
-    public function searchProduct(Request $request)
-    {
-        $motor = Mobil::query()->where('no_plat', $request->no_plat)->first();
-        if($motor === null){
-            return response()->json([],404);
-        }
-        return response()->json($motor);
+// Di controller
+public function getMobil()
+{
+    // Ambil data mobil beserta relasi booking
+    $mobils = Mobil::with('booking')->get();
+    return response()->json($mobils);
+}
+
+
+public function searchProduct(Request $request)
+{
+    $motor = Mobil::query()->with('booking')->where('no_plat', $request->no_plat)->first();
+    if($motor === null){
+        return response()->json([],404);
     }
+    return response()->json($motor);
+}
+
+
     public function insert(Request $request)
     {
         DB::beginTransaction();
@@ -53,6 +65,7 @@ public function index()
                 $it->denda1 = $request->denda1[$i];
                 $it->denda2 = $request->denda2[$i];
                 $it->denda3 = $request->denda3[$i];
+                $it->id_booking = $request->id_booking[$i];
                 $it->save();
                 $subtotal += $it->total;
             }
@@ -82,17 +95,18 @@ public function index()
 {
     try {
         // Menghapus isi tabel pertama
-        DB::table('booking')->truncate();
+        DB::table('denda')->truncate();
         
         // Menghapus isi tabel kedua
         DB::table('transactions')->truncate();
         
-        return redirect()->back()->with('success', 'Semua data dari kedua tabel berhasil dihapus!');
+        return response()->json(['success' => 'Semua data dari kedua tabel berhasil dihapus!']);
     } catch (\Exception $e) {
-        \Log::error('Error saat menghapus data: '.$e->getMessage());
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus data.');
+        return response()->json(['error' => 'Terjadi kesalahan saat menghapus data.'], 500);
     }
 }
 
-
 }
+
+
+

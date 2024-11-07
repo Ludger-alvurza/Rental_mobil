@@ -211,7 +211,7 @@
                                 <div class="select_box_main">
                                     <div class="row">
                                         <div class="col-md-3 select-outline">
-                                            <input type="text" name="name" class="form-control" placeholder="Masukkan Nama Mobil" style="border: 1px solid #007BFF; border-radius: 5px; padding: 10px; font-size: 16px;">
+                                            <input type="text" name="name" class="form-control" placeholder="Masukkan Nama Mobil" style="border: 1px solid #007BFF; border-radius: 5px; padding: 10px; font-size: 16px;" onkeydown="return event.key !== 'Enter';">
                                         </div>
                                         <div class="col-md-3 select-outline">
                                             <select name="type" class="mdb-select md-form md-outline colorful-select dropdown-primary">
@@ -244,6 +244,9 @@
                                                 <option value="tesla">Tesla</option>
                                                 <option value="volvo">Volvo</option>
                                                 <option value="mitsubishi">Mitsubishi</option>
+                                                <option value="Lamborghini">Lamborghini</option>
+                                                <option value="Ferrari">Ferrari</option>
+                                                <option value="MClaren">MClaren</option>
                                             </select>
                                         </div>                                        
                                         <div class="col-md-3 select-outline">

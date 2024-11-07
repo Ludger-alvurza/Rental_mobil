@@ -7,20 +7,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PeminjamanSelesaiNotification extends Notification implements ShouldQueue
+class PaymentSuccess extends Notification
 {
     use Queueable;
-
-    protected $peminjaman;
+    protected $pembayaran;
 
     /**
      * Create a new notification instance.
-     *
-     * @param mixed $peminjaman
      */
-    public function __construct($peminjaman)
+    public function __construct($pembayaran)
     {
-        $this->peminjaman = $peminjaman;
+        $this->pembayaran = $pembayaran;
     }
 
     /**
@@ -39,12 +36,13 @@ class PeminjamanSelesaiNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->view('content.notifications.peminjaman_selesai', [
-                'user' => $notifiable,
-                'peminjaman' => $this->peminjaman,
-            ]);
+                ->subject('Pembayaran Berhasil')
+                ->view('content.notifications.pembayaran-berhasil', [
+                    'user' => $notifiable,
+                    'pembayaran' => $this->pembayaran
+                ]);
+    
     }
-
 
     /**
      * Get the array representation of the notification.
@@ -54,9 +52,7 @@ class PeminjamanSelesaiNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'peminjaman_id' => $this->peminjaman->id,
-            'mobil_id' => $this->peminjaman->mobil->id,
-            'message' => 'Pengembalian mobil telah dikonfirmasi.'
+            //
         ];
     }
 }

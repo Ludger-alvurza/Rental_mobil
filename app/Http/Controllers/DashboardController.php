@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -77,7 +78,19 @@ class DashboardController extends Controller
 }
 
     public function index2(){
-        $kendaraan = Mobil::latest()->get()->take(6);
+        
+
+        $kendaraan = Mobil::leftJoin('message_rating', 'mobils.id', '=', 'message_rating.id_mobil')
+            ->select(
+                'mobils.*', 
+                DB::raw('AVG(message_rating.rating) as avg_rating'), // Rata-rata rating
+                DB::raw('COUNT(message_rating.rating) as total_ratings') // Jumlah rating
+            )
+            ->groupBy('mobils.id')
+            ->orderByDesc('avg_rating')
+            ->take(6)
+            ->get();
+
         $userT = Auth::user();
         $syarat = SyaratS::first();
         $messageRatings = MessageRating::with('user')->get()->take(20);

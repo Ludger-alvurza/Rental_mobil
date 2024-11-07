@@ -19,6 +19,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
 use App\Http\Controllers\MessageRatingController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -52,7 +53,7 @@ Route::get('mail/test', function () {
         ->queue(new \App\Mail\TestMail());
 });
 
-Route::group(['prefix'=>'app','middleware'=>['auth','admin']], function (){
+Route::group(['prefix'=>'app','middleware'=>['auth','superadmin']], function (){
     Route::get('/',[BookingController::class,'index']);
     Route::post('/search-barcode',[BookingController::class,'searchProduct']);
     Route::post('/insert', [BookingController::class, 'insert']);
@@ -101,29 +102,47 @@ Route::group([
 ], function () {
     Route::get('/', [BkuserController::class, 'list']);
     Route::get('/keranjang', [BkuserController::class, 'pesanan']);
+    Route::get('/detail/{id}', [BkuserController::class, 'show'])->name('pesanan.detail');
 //    Route::get('/{id}',[TeacherController::class,'detail']);
     Route::get('/add', [BkuserController::class, 'add']);
     Route::get('/edit/{id}', [BkuserController::class, 'edit']);
+    Route::get('/checkout/{id}', [PaymentController::class, 'createPayment'])->name('checkout');
+    Route::post('/payment/notify', [PaymentController::class, 'notificationHandler'])->name('notif.paymentsuccess');
 
     Route::post('/update', [BkuserController::class, 'update']);
     Route::post('/insert', [BkuserController::class, 'insert']);
     Route::post('/delete', [BkuserController::class, 'delete']);
     Route::post('/selesai/{id}', [BkuserController::class, 'konfirmasiPengembalian'])->name('admin.konfirmasiPengembalian');
     Route::post('/rating/store', [BkuserController::class, 'store'])->name('rating.store');
-
-
+    Route::get('/batal/{id}', [BkuserController::class, 'batalForm'])->name('batal.admin');
+    
+    
 });
+
 Route::group([
     'middleware' => ['auth'],
     'prefix' => 'pesanan'
 ], function () {
-    Route::get('/keranjang', [BkuserController::class, 'pesanan']);
+    Route::get('/detail/{id}', [BkuserController::class, 'show'])->name('pesanan.detail');
+});
+
+Route::group([
+    'middleware' => ['auth'],
+    'prefix' => 'pesanan'
+], function () {
+    Route::post('/selesai/{id}', [BkuserController::class, 'konfirmasiPengembalian'])->name('admin.konfirmasiPengembalian');
+    Route::post('/pembayaran/{id}', [BkuserController::class, 'konfirmasiPembayaran'])->name('admin.konfirmasiPembayaran');
+    Route::get('/pembayaran/detail/{id}', [BkuserController::class, 'detailPembayaran'])->name('admin.detailPembayaran');
+    Route::get('/checkout/{id}', [PaymentController::class, 'createPayment'])->name('checkout');
+    Route::get('/keranjang', [BkuserController::class, 'pesanan'])->name('keranjang.pesanan');
+    Route::get('/detail/{id}', [BkuserController::class, 'show'])->name('pesanan.detail');
 //    Route::get('/{id}',[TeacherController::class,'detail']);
     Route::get('/add', [BkuserController::class, 'add']);
     Route::get('/edit/{id}', [BkuserController::class, 'batal']);
 
     Route::post('/batal', [BkuserController::class, 'batal']);
     Route::post('/insert', [BkuserController::class, 'insert']);
+    Route::post('/rating/store', [BkuserController::class, 'store'])->name('rating.store');
 });
 Route::group([
     'middleware' => ['auth'],
@@ -179,7 +198,7 @@ Route::group([
     'middleware' => ['auth'], // Middleware auth & superadmin
     'prefix' => 'message_ratings'           // Prefix untuk message ratings
 ], function () {
-    Route::get('/review/{id}', [MessageRatingController::class, 'message']); // Route untuk menampilkan
+    Route::get('/review/{id}', [MessageRatingController::class, 'message'])->name('message_ratings.review'); // Route untuk menampilkan
     Route::get('/', [MessageRatingController::class, 'index'])->name('message_ratings.index'); // Route untuk menampilkan list message ratings
     Route::get('/create', [MessageRatingController::class, 'create'])->name('message_ratings.create'); // Route untuk halaman tambah message rating
     Route::post('/insert', [MessageRatingController::class, 'insert']); // Route untuk insert message rating baru
@@ -188,6 +207,7 @@ Route::group([
     // Route::put('/{messageRating}', [MessageRatingController::class, 'update'])->name('message_ratings.update'); // Route untuk update message rating
     Route::post('/delete', [MessageRatingController::class, 'delete']); // Route untuk delete message rating
 });
+
 
 
 

@@ -10,7 +10,7 @@ class ItemTransaction extends Model
 {
     use HasFactory,SoftDeletes;
     protected $table = 'denda';
-    protected $fillable = ['id','denda3', 'denda2', 'denda1', 'denda', 'id_transaction', 'id_mobil', 'price', 'qty', 'total'];
+    protected $fillable = ['id','denda3', 'denda2', 'denda1', 'denda', 'id_transaction', 'id_mobil', 'price', 'qty', 'total','id_booking'];
 
     public function Transaction(){
         return $this->belongsTo(Transaction::class,'id_transaction','id');
@@ -19,4 +19,9 @@ class ItemTransaction extends Model
     public function Mobil(){
         return $this->belongsTo(Mobil::class,'id_mobil');
     }
+    public function booking()
+    {
+        return $this->belongsTo(bkuser::class, 'id_booking');
+    }
+
 }

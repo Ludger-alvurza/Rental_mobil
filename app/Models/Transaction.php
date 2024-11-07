@@ -10,7 +10,7 @@ class Transaction extends Model
 {
     use HasFactory,SoftDeletes;
     protected $table = 'transactions';
-    protected $fillable = ['id','id_transaction'];
+    protected $fillable = ['id','id_transaction','total'];
 
     public function ItemTransaction()
     {
@@ -24,4 +24,9 @@ class Transaction extends Model
 
         return $prefix . str_pad(($lastNumber + 1),4,'0',STR_PAD_LEFT);
     }
+    public function bookings()
+    {
+        return $this->hasMany(bkuser::class, 'id_transactions');
+    }
+
 }

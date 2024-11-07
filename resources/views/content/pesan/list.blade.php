@@ -12,15 +12,13 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>No</th>
-                                    <th>Nama</th>
-                                    <th>Nama Mobil</th>
-                                    <th>Nomor Plat</th>
-                                    <th>Lama sewa</th>
-                                    <th>Keterangan</th>
-                                    <th>Status Pemesanan</th>
-                                    <th class="text-center">Action</th>
-                                    <th>Status Pengembalian</th>
+                                    <th class="text-center">No</th>
+                                    <th class="text-center">ID Booking</th>
+                                    <th class="text-center">Status Pemesanan</th>
+                                    <th>Action</th>
+                                    <th class="text-center">Verifikasi Pesanan</th>
+                                    <th class="text-center">Status Pengembalian</th>
+                                    <th>Status Pembayaran</th>
                                     <th>Tandai Selesai</th>
                                 </tr>
                             </thead>
@@ -30,19 +28,14 @@
                                 @endphp
                                 @foreach ($bkuser as $row)
                                     <tr>
-                                        <td>{{ $i++ }}</td>
-                                        <td>{{ $row->name }}</td>
-                                        <td>{{ $row->name_mobil }}</td>
-                                        <td>{{ $row->no_plat }}</td>
-                                        <td>{{ $row->lama_sewa }}</td>
-                                        <td>{{ $row->keterangan }}</td>
-                                        <td>
-                                            <span
-                                                class="badge
-                                            {{ $row->pembatalan == 'Terverifikasi' ? 'bg-success' : ($row->pembatalan == 'Dipesan' ? 'bg-warning' : 'bg-danger') }}">
+                                        <td class="text-center">{{ $i++ }}</td>
+                                        <td class="text-center">{{ $row->id }}</td>
+                                        <td class="text-center"> <!-- Menambahkan kelas text-center untuk meratakan teks di tengah -->
+                                            <span class="badge
+                                                {{ $row->pembatalan == 'Terverifikasi' ? 'bg-success' : ($row->pembatalan == 'Dipesan' ? 'bg-warning' : 'bg-danger') }}">
                                                 {{ $row->pembatalan }}
                                             </span>
-                                        </td>
+                                        </td>                                        
                                         <td>
                                             @can('admin')
                                                 <button type="button" data-id-pesanan="{{ $row->id }}"
@@ -54,11 +47,12 @@
                                                     data-bs-target="#editModal{{ $row->id }}">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
+                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                        data-bs-target="#detailModal{{ $row->id }}" data-bs-toggle="tooltip" title="Lihat Detail Pesanan">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
                                             @endcan
-                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                                data-bs-target="#pembatalanPesan{{ $row->id }}">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
+                                            
                                             <!-- Modal -->
                                             <div class="modal fade" id="pembatalanPesan{{ $row->id }}" tabindex="-1"
                                                 aria-labelledby="pembatalanPesanLabel{{ $row->id }}"
@@ -67,7 +61,7 @@
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title"
-                                                                id="pembatalanPesanLabel{{ $row->id }}">Pembatalan
+                                                                id="pembatalanPesanLabel{{ $row->id }}">Verifikasi
                                                                 Pesanan</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                                 aria-label="Close"></button>
@@ -199,18 +193,60 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="modal fade" id="detailModal{{ $row->id }}" tabindex="-1"
+                                                aria-labelledby="editModalLabel{{ $row->id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="editModalLabel{{ $row->id }}">
+                                                                Detail Pesanan</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="row">
+                                                                <div class="col-12">
+                                                                    <div class="card">
+                                                                        <div class="card-body">
+                                                                            <p><strong>Nama Pemesan:</strong> {{ $row->name }}</p>
+                                                                            <p><strong>No Plat:</strong> {{ $row->no_plat }}</p>
+                                                                            <p><strong>Nama Mobil:</strong> {{ $row->name_mobil }}</p>
+                                                                            <p><strong>Lama Sewa:</strong> {{ $row->lama_sewa }}</p>
+                                                                            <p><strong>Keterangan:</strong> {{ $row->keterangan }}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>                                            
+                                        </td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                                        data-bs-target="#pembatalanPesan{{ $row->id }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>                                            
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge 
+                                            <span
+                                                class="badge 
                                                 {{ $row->status == 'selesai' ? 'bg-success' : ($row->status == 'pending' ? 'bg-warning' : 'bg-danger') }} mx-auto">
                                                 {{ $row->status }}
                                             </span>
-                                        </td>                                                                                                                                                                                                    
+                                        </td>
+                                        <td class="text-center">
+                                            <span
+                                                class="badge 
+                                                {{ $row->payment_status == 'Paid' ? 'bg-success' : ($row->payment_status == 'Pending' ? 'bg-warning' : 'bg-danger') }} mx-auto">
+                                                {{ $row->payment_status }}
+                                            </span>
+                                        </td>
                                         <td>
-                                            <button type="button" 
-                                                    class="btn btn-success btn-konfirmasi" 
-                                                    data-id="{{ $row->id }}" 
-                                                    data-name="Pesanan {{ $row->id }}">
+                                            <button type="button" class="btn btn-success btn-konfirmasi"
+                                                data-id="{{ $row->id }}" data-name="Pesanan {{ $row->id }}">
                                                 Konfirmasi Pengembalian
                                             </button>
                                         </td>
@@ -266,10 +302,17 @@
         });
     </script>
     <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>    
+    <script>
         $(function() {
             $('.btn-konfirmasi').on('click', function() {
                 let idPesanan = $(this).data('id');
                 let name = $(this).data('name');
+
                 Swal.fire({
                     title: "Konfirmasi",
                     text: `Anda yakin konfirmasi pengembalian untuk ${name}?`,
@@ -282,19 +325,28 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('admin.konfirmasiPengembalian', '') }}/" + idPesanan, // URL untuk konfirmasi pengembalian
+                            url: "{{ route('admin.konfirmasiPengembalian', '') }}/" +
+                                idPesanan,
                             type: 'POST',
                             data: {
-                                _token: '{{ csrf_token() }}', // Tambahkan token CSRF
+                                _token: '{{ csrf_token() }}',
                             },
                             success: function(response) {
-                                Swal.fire('Sukses', 'Pengembalian berhasil dikonfirmasi', 'success')
-                                    .then(function() {
-                                        window.location.reload(); // Reload halaman setelah konfirmasi
-                                    });
+                                if (response.message === 'Pesanan ini sudah selesai') {
+                                    Swal.fire('Info', response.message, 'info');
+                                } else {
+                                    Swal.fire('Sukses',
+                                            'Pengembalian berhasil dikonfirmasi',
+                                            'success')
+                                        .then(function() {
+                                            window.location.reload();
+                                        });
+                                }
                             },
                             error: function() {
-                                Swal.fire('Gagal', 'Terjadi kesalahan ketika konfirmasi pengembalian', 'error');
+                                Swal.fire('Gagal',
+                                    'Terjadi kesalahan ketika konfirmasi pengembalian',
+                                    'error');
                             }
                         });
                     }

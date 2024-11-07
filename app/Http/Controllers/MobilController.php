@@ -8,6 +8,7 @@ use App\Models\SyaratS;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Session;
 
@@ -134,38 +135,49 @@ class MobilController extends Controller
     }
     
     public function search(Request $request)
-    {
-        // Ambil semua input pencarian
-        $userT = Auth::user();
-        $syarat = SyaratS::first();
-        $name = $request->input('name');
-        $brand = $request->input('brand');
-        $type = $request->input('type');
-        $harga = $request->input('harga');
-        $messageRatings = MessageRating::with('user')->get()->take(20);
+{
+    // Ambil semua input pencarian
+    $userT = Auth::user();
+    $syarat = SyaratS::first();
+    $name = $request->input('name');
+    $brand = $request->input('brand');
+    $type = $request->input('type');
+    $harga = $request->input('harga');
+    $messageRatings = MessageRating::with('user')->latest()->take(20)->get(); // Ambil 20 ulasan terbaru
 
-        // Query buat filter
-        $query = Mobil::query();
+    // Query untuk filter
+    $query = Mobil::leftJoin('message_rating', 'mobils.id', '=', 'message_rating.id_mobil')
+        ->select(
+            'mobils.*', 
+            DB::raw('AVG(message_rating.rating) as avg_rating'), // Rata-rata rating
+            DB::raw('COUNT(message_rating.rating) as total_ratings') // Jumlah rating
+        )
+        ->groupBy('mobils.id');
 
-        if (!empty($name)) {
-            $query->where('name', 'like', '%' . $name . '%');
-        }
-        if (!empty($brand)) {
-            $query->where('brand', $brand);
-        }
-
-        if (!empty($type)) {
-            $query->where('type', $type);
-        }
-
-        if (!empty($harga)) {
-            $query->where('price_per_day', '<=', $harga);
-        }
-
-        // Eksekusi query
-        $kendaraan = $query->get();
-
-        // Kirim hasil pencarian ke view
-        return view('layout-fe.dashboardfe', ['kendaraan' => $kendaraan,'userT' => $userT,'messageRatings' => $messageRatings,'syarat' => $syarat]);
+    // Tambahkan filter pencarian
+    if (!empty($name)) {
+        $query->where('mobils.name', 'like', '%' . $name . '%');
     }
+    if (!empty($brand)) {
+        $query->where('mobils.brand', $brand);
+    }
+    if (!empty($type)) {
+        $query->where('mobils.type', $type);
+    }
+    if (!empty($harga)) {
+        $query->where('mobils.price_per_day', '<=', $harga);
+    }
+
+    // Eksekusi query dan ambil hasil
+    $kendaraan = $query->orderByDesc('avg_rating')->paginate(6); // Gunakan pagination untuk hasil pencarian
+
+    // Kirim hasil pencarian ke view
+    return view('layout-fe.dashboardfe', [
+        'kendaraan' => $kendaraan,
+        'userT' => $userT,
+        'messageRatings' => $messageRatings,
+        'syarat' => $syarat,
+    ]);
+}
+
 }

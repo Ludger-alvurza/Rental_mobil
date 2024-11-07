@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\PembatalanOtomatis;
 use App\Models\bkuser;
+use App\Models\ItemTransaction;
 use App\Models\MessageRating;
 use App\Models\SyaratS;
 use App\Models\User;
+use App\Notifications\PaymentSuccess;
 use App\Notifications\PeminjamanSelesaiNotification;
+use App\Notifications\PesananDibatalkanMail;
+use App\Notifications\PesananTerverifikasiMail;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class BkuserController extends Controller
@@ -51,6 +57,8 @@ class BkuserController extends Controller
             'id_user' => 'required',
             'name' => 'required',
             'no_plat' => 'required',
+            'booking_start' =>  'required',
+            'booking_end' => 'required',
             'name_mobil' => 'required',
             'lama_sewa' => 'required',
             'keterangan' => 'required'
@@ -61,6 +69,8 @@ class BkuserController extends Controller
         $bkuser->id_user = $request->id_user;
         $bkuser->name = $request->name;
         $bkuser->no_plat = $request->no_plat;
+        $bkuser->booking_start = $request->booking_start;
+        $bkuser->booking_end = $request->booking_end;
         $bkuser->name_mobil = $request->name_mobil;
         $bkuser->lama_sewa = $request->lama_sewa;
         $bkuser->keterangan = $request->keterangan;
@@ -120,41 +130,91 @@ class BkuserController extends Controller
             return redirect(url('/pesanan'));
         }
     }
+
+    public function batalForm($id){
+        $row = bkuser::find($id);
+        return view('content.formbatal.bataladmin',compact('row'));
+    }
+
     public function batal(Request $request)
 {
     try {
+        // Validasi input
         $validated = $request->validate([
             'pembatalan' => 'required|in:Dipesan,Dibatalkan,Terverifikasi',
         ]);
 
-        $bkuser = bkuser::findOrFail($request->id);
+        $bkuser = Bkuser::findOrFail($request->id);
+        $user = auth()->user();
+
+        if ($bkuser->pembatalan === 'Dibatalkan' && $user->role === 'superadmin') {
+            if ($request->pembatalan === 'Terverifikasi') {
+                Session::flash('error', 'Pesanan sudah dibatalkan dan tidak dapat diverifikasi.');
+                return $this->redirectBasedOnRole($user);
+            }
+
+            if ($request->pembatalan === 'Dipesan' && $user->role === 'superadmin') {
+                Session::flash('error', 'Pesanan sudah dibatalkan dan tidak dapat diubah menjadi Dipesan.');
+                return $this->redirectBasedOnRole($user);
+            }
+        }
+
+        if ($user && $user->role !== 'superadmin') {
+            if ($request->pembatalan === 'Dibatalkan') {
+                // Kirim notifikasi ke admin
+                $admins = User::where('role', 'superadmin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new PesananDibatalkanMail($bkuser));
+                }
+
+                dispatch(new PembatalanOtomatis($bkuser->id))->delay(now()->addMinutes(10));
+                Session::flash('success', 'Permintaan pembatalan sudah dikirim ke admin. Silahkan Tunggu 10 menit pesanan akan otomatis dibatalkan.');
+                return redirect(url('/pesanan/keranjang'));
+            } elseif ($request->pembatalan === 'Dipesan') {
+                $bkuser->pembatalan = 'Dipesan';
+                $bkuser->save();
+                Session::flash('success', 'Data pesanan berhasil diubah menjadi Dipesan.');
+                return redirect(url('/pesanan/keranjang'));
+            } else {
+                Session::flash('error', 'Anda tidak memiliki izin untuk melakukan tindakan ini. Silakan hubungi admin.');
+                return redirect(url('/pesanan/keranjang'));
+            }
+        }
 
         $bkuser->pembatalan = $request->pembatalan;
         $bkuser->save();
 
-        // Tentukan pesan berdasarkan nilai pembatalan
-        if ($request->pembatalan == 'Dibatalkan') {
+        if ($bkuser->pembatalan === 'Terverifikasi') {
+            $userPesanan = User::find($bkuser->id_user);
+            if ($userPesanan) {
+                $userPesanan->notify(new PesananTerverifikasiMail($bkuser));
+                Session::flash('success', 'Data pesanan berhasil diverifikasi dan email notifikasi telah dikirim.');
+            } else {
+                Session::flash('error', 'Pengguna terkait pesanan ini tidak ditemukan, notifikasi tidak dapat dikirim.');
+            }
+        } elseif ($request->pembatalan == 'Dibatalkan') {
             Session::flash('success', 'Data pesanan berhasil dibatalkan.');
-        } elseif ($request->pembatalan == 'Terverifikasi') {
-            Session::flash('success', 'Data pesanan berhasil diverifikasi.');
         } else {
             Session::flash('success', 'Data pesanan berhasil dilanjutkan.');
         }
 
-        // Cek peran pengguna secara manual
-        $user = auth()->user();
-
-        if ($user && $user->role === 'superadmin') {
-            return redirect(url('/pesanan'));
-        } else {
-            return redirect(url('/pesanan/keranjang'));
-        }
+        return $this->redirectBasedOnRole($user);
 
     } catch (ModelNotFoundException $e) {
         Session::flash('error', 'Gagal memperbarui data pesanan. Pesanan tidak ditemukan.');
         return redirect(url('/pesanan/keranjang'));
     } catch (\Exception $e) {
         Session::flash('error', 'Terjadi kesalahan. Gagal memperbarui data pesanan.');
+        return redirect(url('/pesanan/keranjang'));
+    }
+}
+
+// Fungsi untuk redirect berdasarkan role user
+private function redirectBasedOnRole($user)
+{
+    if ($user && $user->role === 'superadmin') {
+        return redirect(url('/pesanan'));
+    } else {
         return redirect(url('/pesanan/keranjang'));
     }
 }
@@ -172,35 +232,79 @@ class BkuserController extends Controller
     }
 
     public function konfirmasiPengembalian($id)
+{
+
+    $peminjaman = bkuser::find($id);
+    
+    // Cek apakah peminjaman ditemukan
+    if (!$peminjaman) {
+        return response()->json(['error' => 'Peminjaman tidak ditemukan'], 404);
+    }
+
+    // Jika status sudah selesai, tidak perlu kirim notifikasi lagi
+    if ($peminjaman->status === 'selesai') {
+        return response()->json(['message' => 'Pesanan ini sudah selesai'], 200);
+    }
+
+    // Update status peminjaman menjadi selesai
+    $peminjaman->status = 'selesai';
+    $peminjaman->save();
+
+    // Kirim notifikasi ke user jika status sebelumnya belum selesai
+    $user = User::find($peminjaman->id_user);
+    
+    if ($user) {
+        $user->notify(new PeminjamanSelesaiNotification($peminjaman));
+    } else {
+        // Tangani jika pengguna tidak ditemukan
+        return response()->json(['error' => 'Pengguna tidak ditemukan'], 404);
+    }
+
+    return response()->json(['message' => 'Status peminjaman diperbarui dan notifikasi telah dikirim'], 200);
+}
+    public function konfirmasiPembayaran($id)
     {
-        $peminjaman = bkuser::find($id);
+        $pembayaran = bkuser::find($id);
         
         // Cek apakah peminjaman ditemukan
-        if (!$peminjaman) {
-            return response()->json(['error' => 'Peminjaman tidak ditemukan'], 404);
+        if (!$pembayaran) {
+            return response()->json(['error' => 'Pembayaran tidak ditemukan'], 404);
         }
-    
-        // Log status sebelum diubah
-    
-        // Update status peminjaman menjadi selesai
-        $peminjaman->status = 'selesai';
-        $peminjaman->save();
-    
-        // Log status setelah diubah
-    
-        // Kirim notifikasi ke user
-        $user = User::find($peminjaman->id_user);
 
+        // Jika status sudah selesai, tidak perlu kirim notifikasi lagi
+        if ($pembayaran->payment_status === 'paid') {
+            return response()->json(['message' => 'Pesanan ini sudah Di Bayar'], 200);
+        }
+
+        // Update status peminjaman menjadi selesai
+        $pembayaran->payment_status = 'paid';
+        $pembayaran->save();
+
+        // Kirim notifikasi ke user jika status sebelumnya belum selesai
+        $user = User::find($pembayaran->id_user);
+        
         if ($user) {
-            $user->notify(new PeminjamanSelesaiNotification($peminjaman));
+            $user->notify(new PaymentSuccess($pembayaran));
         } else {
             // Tangani jika pengguna tidak ditemukan
+            return response()->json(['error' => 'Pengguna tidak ditemukan'], 404);
         }
 
-        
-    
-        return redirect()->back()->with('success', 'Pengembalian telah dikonfirmasi.');
+        return response()->json(['message' => 'Status Pembayaran Lunas dan notifikasi telah dikirim'], 200);
     }
+    public function detailPembayaran($id)
+{
+    $bkuser = bkuser::find($id);
+    $transaction = ItemTransaction::where('id_booking', $id)->first();
+
+    if (!$bkuser) {
+        abort(404, 'Data tidak ditemukan');
+    }
+
+    return view('content.detailpembayaran.detail', compact('bkuser','transaction'));
+}
+
+
     
 public function store(Request $request)
 {
@@ -218,6 +322,20 @@ public function store(Request $request)
 
     return redirect()->back()->with('success', 'Rating telah diberikan.');
 }
+public function show($id)
+{
+    // \Log::info("Detail booking accessed for ID: " . $id); // Log untuk debugging
+    $booking = bkuser::find($id);
+    
+    if (!$booking) {
+        // \Log::warning("Booking not found for ID: " . $id); // Log jika booking tidak ditemukan
+        abort(404);
+    }
+
+    // \Log::info("Booking found: " . json_encode($booking)); // Log booking yang ditemukan
+    return view('content.pesan.show', compact('booking'));
+}
+
 
 
 }
