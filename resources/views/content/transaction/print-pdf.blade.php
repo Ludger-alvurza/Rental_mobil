@@ -54,10 +54,7 @@
         <th>Harga Perhari</th>
         <th>Lama Sewa</th>
         <th>Total</th>
-        <th>Telat 1 jam</th>
-        <th>Telat 3 jam</th>
-        <th>Telat 5 jam</th>
-        <th>Telat 24 jam</th>
+        <th>Denda</th>
     </tr>
     @foreach($row->ItemTransaction as $item)
         <tr>
@@ -65,10 +62,9 @@
             <td class="right">{{number_format($item->price)}}</td>
             <td class="right">{{$item->qty}}</td>
             <td class="right">{{number_format($row->total)}}</td>
-            <td class="right">{{number_format($item->denda)}}</td>
-            <td class="right">{{number_format($item->denda1)}}</td>
-            <td class="right">{{number_format($item->denda2)}}</td>
-            <td class="right">{{number_format($item->denda3)}}</td>
+            <td class="right">
+                Rp {{ $row->denda !== null ? number_format($row->denda, 0, ',', '.') : '-' }}
+            </td>
         </tr>
     @endforeach
 </table>

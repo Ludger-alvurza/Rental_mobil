@@ -221,7 +221,7 @@
               </g>
             </svg>
           </div>
-          <span class="nav-link-text ms-1">Peminjaman Mobil</span>
+          <span class="nav-link-text ms-1">Proses Peminjaman</span>
         </a>
       </li>
       <li class="nav-item">

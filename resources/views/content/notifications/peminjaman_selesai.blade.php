@@ -52,7 +52,7 @@
         <p>Pengembalian mobil dengan nama "<strong>{{ $peminjaman->mobil->name }}</strong>" telah berhasil dikonfirmasi.
         </p>
         <p>Anda dapat memberikan rating untuk pengalaman peminjaman ini.</p>
-        <a href="{{ url('/message_ratings/review/' . $peminjaman->mobil->id) }}" class="button">Berikan Rating</a>
+        <a href="{{ url('message_ratings/review/' . $peminjaman->mobil->id) }}" class="button">Berikan Rating</a>
         <p>Terima kasih telah menggunakan aplikasi kami!</p>
     </div>
 </body>

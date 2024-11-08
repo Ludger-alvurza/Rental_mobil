@@ -17,7 +17,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
 {
-    $schedule->command('booking:reminder')->everyFiveSeconds(); 
+    $schedule->command('booking:reminder')->daily();
+    $schedule->command('app:calculate-denda')->dailyAt('00:00');
 }
 
 

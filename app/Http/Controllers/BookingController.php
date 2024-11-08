@@ -41,8 +41,14 @@ public function searchProduct(Request $request)
     public function insert(Request $request)
     {
         DB::beginTransaction();
-        try{
-            $prefix='INV'.date('ym').'/';
+        try {
+            // Mengecek apakah price ada dan valid
+            if (!isset($request->price) || !is_array($request->price) || empty($request->price)) {
+                return redirect()->back()->with('Gagal', 'Tidak ada item yang valid untuk diproses.');
+            }
+
+            // Membuat kode transaksi baru
+            $prefix = 'INV' . date('ym') . '/';
             $code = Transaction::getLastCode($prefix);
             $transaction = new Transaction();
             $transaction->code = $code;
@@ -52,35 +58,55 @@ public function searchProduct(Request $request)
             $transaction->total = 0;
             $transaction->created_by = Auth::id();
             $transaction->save();
+
             $subtotal = 0;
             $itemCount = count($request->price);
-            for($i = 0;$i< $itemCount; $i++) {
-                $it = new ItemTransaction();
-                $it->id_transaction =$transaction->id;
-                $it->id_mobil = $request->id_mobil[$i];
-                $it->price = $request->price[$i];
-                $it->qty = $request->qty[$i];
-                $it->total = (int)$it->price * (int)$it->qty;
-                $it->denda = $request->denda[$i];
-                $it->denda1 = $request->denda1[$i];
-                $it->denda2 = $request->denda2[$i];
-                $it->denda3 = $request->denda3[$i];
-                $it->id_booking = $request->id_booking[$i];
-                $it->save();
-                $subtotal += $it->total;
+
+            // Proses setiap item dalam transaksi
+            for ($i = 0; $i < $itemCount; $i++) {
+                // Periksa apakah price dan qty ada dan valid
+                if (!empty($request->price[$i]) && !empty($request->qty[$i])) {
+                    $it = new ItemTransaction();
+                    $it->id_transaction = $transaction->id;
+                    $it->id_mobil = $request->id_mobil[$i]; // id mobil
+                    $it->price = $request->price[$i]; // harga per item
+                    $it->qty = $request->qty[$i]; // jumlah
+                    $it->total = (int)$it->price * (int)$it->qty; // total harga per item
+                    $it->denda = $request->denda[$i] ?? 0; // denda (jika ada)
+                    $it->denda1 = $request->denda1[$i] ?? 0; // denda1 (jika ada)
+                    $it->denda2 = $request->denda2[$i] ?? 0; // denda2 (jika ada)
+                    $it->denda3 = $request->denda3[$i] ?? 0; // denda3 (jika ada)
+                    $it->id_booking = $request->id_booking[$i]; // id booking
+                    $it->save();
+
+                    // Tambahkan total harga ke subtotal
+                    $subtotal += $it->total;
+                }
             }
+
+            // Jika tidak ada item yang valid
+            if ($subtotal == 0) {
+                DB::rollBack();
+                return redirect()->back()->with('Gagal', 'Tidak ada item valid untuk diproses.');
+            }
+
+            // Menghitung subtotal, diskon, dan total
             $transaction->subtotal = $subtotal;
-            $discount = $subtotal * (int)$request->discount / 100;
+            $discount = ($subtotal * (int)$request->discount) / 100;
             $transaction->discount = $request->discount;
             $transaction->total = $subtotal - $discount;
             $transaction->save();
+
+            // Commit transaksi
             DB::commit();
             return redirect()->back()->with('Berhasil', 'Transaksi Berhasil');
-        }catch (Exception $e){
+        } catch (Exception $e) {
+            // Rollback jika terjadi error
             DB::rollBack();
             return redirect()->back()->with('Gagal', 'Transaksi Gagal');
         }
     }
+
     public function delete(Request $request)
     {
         $idTr = $request->id;

@@ -9,7 +9,7 @@ class bkuser extends Model
 {
     use HasFactory;
     protected $table = 'bookings';
-    protected $fillable = ['id_user','name','no_plat','name_mobil','lama_sewa','keterangan','user_id','id_mobil','status_payment','status_booking','booking_start','booking_end','status','pembatalan','id'];
+    protected $fillable = ['id_user','name','no_plat','name_mobil','lama_sewa','keterangan','user_id','id_mobil','status_payment','status_booking','booking_start','booking_end','status','pembatalan','id','id_transactions'];
     public function user()
     {
         return $this->belongsTo(User::class,'id_user');

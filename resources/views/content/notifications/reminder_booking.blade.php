@@ -45,7 +45,7 @@
         <h1>Halo, {{ $user->name }}!</h1>
         <p>Ini adalah pengingat bahwa Anda memiliki jadwal rental mobil pada tanggal <strong>{{ $booking->booking_start }}</strong>.</p>
         <p>Jangan lupa untuk mempersiapkan segala keperluan sebelum jadwal rental.</p>
-        <a href="{{ url('/pesanan/detail/'.$booking->id) }}" class="button">Cek Detail Booking</a>
+        <a href="{{ url('pesanan/detail/'.$booking->id) }}" class="button">Cek Detail Booking</a>
         <p>Terima kasih telah menggunakan layanan kami!</p>
     </div>
 </body>

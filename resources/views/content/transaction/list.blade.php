@@ -48,6 +48,7 @@
                             <th>Kode</th>
                             <th>tanggal</th>
                             <th>Total</th>
+                            <th>denda</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -58,7 +59,10 @@
                             <td>{{$counter++}}</td>
                             <td>{{$row->code}}</td>
                             <td>{{$row->date}}</td>
-                            <td class="text-right">Rp {{$row->total}}</td>
+                            <td class="text-right">Rp {{ number_format($row->total, 0, ',', '.') }}</td>
+                            <td class="right">
+                                Rp {{ $row->denda !== null ? number_format($row->denda, 0, ',', '.') : '-' }}
+                            </td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editModal{{$row->id}}">
                                     <i class="fas fa-eye"></i>
