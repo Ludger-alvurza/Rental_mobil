@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Jenssegers\Agent\Agent;
 
 class DashboardController extends Controller
 {
@@ -61,6 +62,8 @@ class DashboardController extends Controller
     $syarat = SyaratS::first();
     $motor = Mobil::count();
     $kendaraan = Mobil::latest()->take(6)->get();
+    $agent = new Agent();
+    $isMobile = $agent->isMobile();
 
     // Kirim data ke view
     return view('content.dashboard', [
@@ -73,33 +76,86 @@ class DashboardController extends Controller
         'totalUang' => $totalUang,
         'pendapatanBulanArray' => $pendapatanBulanArray,
         'bulanLabels' => $bulanLabels,
-        'selectedYear' => $selectedYear
+        'selectedYear' => $selectedYear,
+        'isMobile' => $isMobile
     ]);
 }
 
-    public function index2(){
-        
+public function index2(){
+    // Ambil semua kendaraan
+    $kendaraan = Mobil::leftJoin('message_rating', 'mobils.id', '=', 'message_rating.id_mobil')
+        ->select(
+            'mobils.*', 
+            DB::raw('AVG(message_rating.rating) as avg_rating'), // Rata-rata rating
+            DB::raw('COUNT(message_rating.rating) as total_ratings') // Jumlah rating
+        )
+        ->groupBy('mobils.id')
+        ->orderByDesc('avg_rating')
+        ->take(6)
+        ->get();
 
-        $kendaraan = Mobil::leftJoin('message_rating', 'mobils.id', '=', 'message_rating.id_mobil')
-            ->select(
-                'mobils.*', 
-                DB::raw('AVG(message_rating.rating) as avg_rating'), // Rata-rata rating
-                DB::raw('COUNT(message_rating.rating) as total_ratings') // Jumlah rating
-            )
-            ->groupBy('mobils.id')
-            ->orderByDesc('avg_rating')
-            ->take(6)
-            ->get();
+    $agent = new Agent();
 
-        $userT = Auth::user();
-        $syarat = SyaratS::first();
-        $messageRatings = MessageRating::with('user')->get()->take(20);
-        return view('layout-fe.dashboardfe' ,['kendaraan' => $kendaraan,'userT' => $userT,'syarat' => $syarat,'messageRatings' => $messageRatings]);
+    $isMobile = $agent->isMobile();
+    $userT = Auth::user();
+    $syarat = SyaratS::first();
+    $messageRatings = MessageRating::with('user')->get()->take(20);
+
+    // Ambil data booking untuk setiap mobil
+    foreach ($kendaraan as $mobil) {
+        // Ambil semua booking yang ada untuk mobil ini
+        $bookings = bkuser::where('id_mobil', $mobil->id)
+            ->get(['booking_start', 'booking_end']);
+
+        $availableDates = [];
+        $today = \Carbon\Carbon::today(); // Tanggal hari ini
+        $endPeriod = \Carbon\Carbon::today()->addDays(30); // Bisa disesuaikan, ini misalnya 30 hari ke depan
+
+        // Loop dari tanggal hari ini sampai tanggal yang diinginkan
+        while ($today <= $endPeriod) {
+            $isAvailable = true;
+
+            // Periksa apakah tanggal tersebut bentrok dengan booking yang ada
+            foreach ($bookings as $booking) {
+                $bookingStart = \Carbon\Carbon::parse($booking->booking_start);
+                $bookingEnd = \Carbon\Carbon::parse($booking->booking_end);
+
+                // Cek jika tanggal hari ini ada dalam rentang booking
+                if ($today->between($bookingStart, $bookingEnd)) {
+                    $isAvailable = false;
+                    break;
+                }
+            }
+
+            // Jika tanggal tidak bentrok, tambahkan ke array tanggal yang tersedia
+            if ($isAvailable) {
+                $availableDates[] = $today->format('Y-m-d');
+            }
+
+            // Tambahkan satu hari ke tanggal sekarang
+            $today->addDay();
+        }
+
+        // Menyimpan tanggal yang tersedia pada mobil ini
+        $mobil->available_dates = $availableDates;
     }
+
+    return view('layout-fe.dashboardfe', [
+        'kendaraan' => $kendaraan,
+        'userT' => $userT,
+        'syarat' => $syarat,
+        'messageRatings' => $messageRatings,
+        'isMobile' => $isMobile
+    ]);
+}
+
     public function index3(){
+        $agent = new Agent();
+
+        $isMobile = $agent->isMobile();
         $kendaraan = Mobil::latest()->get()->take(6);
         $syarat = SyaratS::first();
         $messageRatings = MessageRating::with('user')->get()->take(20);
-        return view('layout-fe.dashboardfe2' ,['kendaraan' => $kendaraan,'syarat' => $syarat, 'messageRatings' => $messageRatings]);
+        return view('layout-fe.dashboardfe2' ,['kendaraan' => $kendaraan,'syarat' => $syarat, 'messageRatings' => $messageRatings,'isMobile' => $isMobile]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\bkuser;
 use App\Models\MessageRating;
 use App\Models\Mobil;
 use App\Models\SyaratS;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Session;
+use Jenssegers\Agent\Agent;
 
 class MobilController extends Controller
 {
@@ -171,12 +173,54 @@ class MobilController extends Controller
     // Eksekusi query dan ambil hasil
     $kendaraan = $query->orderByDesc('avg_rating')->paginate(6); // Gunakan pagination untuk hasil pencarian
 
+    $agent = new Agent();
+    $isMobile = $agent->isMobile();
+    // Ambil data booking untuk setiap mobil
+    foreach ($kendaraan as $mobil) {
+        // Ambil semua booking yang ada untuk mobil ini
+        $bookings = bkuser::where('id_mobil', $mobil->id)
+            ->get(['booking_start', 'booking_end']);
+
+        $availableDates = [];
+        $today = \Carbon\Carbon::today(); // Tanggal hari ini
+        $endPeriod = \Carbon\Carbon::today()->addDays(30); // Bisa disesuaikan, ini misalnya 30 hari ke depan
+
+        // Loop dari tanggal hari ini sampai tanggal yang diinginkan
+        while ($today <= $endPeriod) {
+            $isAvailable = true;
+
+            // Periksa apakah tanggal tersebut bentrok dengan booking yang ada
+            foreach ($bookings as $booking) {
+                $bookingStart = \Carbon\Carbon::parse($booking->booking_start);
+                $bookingEnd = \Carbon\Carbon::parse($booking->booking_end);
+
+                // Cek jika tanggal hari ini ada dalam rentang booking
+                if ($today->between($bookingStart, $bookingEnd)) {
+                    $isAvailable = false;
+                    break;
+                }
+            }
+
+            // Jika tanggal tidak bentrok, tambahkan ke array tanggal yang tersedia
+            if ($isAvailable) {
+                $availableDates[] = $today->format('Y-m-d');
+            }
+
+            // Tambahkan satu hari ke tanggal sekarang
+            $today->addDay();
+        }
+
+        // Menyimpan tanggal yang tersedia pada mobil ini
+        $mobil->available_dates = $availableDates;
+    }
+
     // Kirim hasil pencarian ke view
     return view('layout-fe.dashboardfe', [
         'kendaraan' => $kendaraan,
         'userT' => $userT,
         'messageRatings' => $messageRatings,
         'syarat' => $syarat,
+        'isMobile' => $isMobile
     ]);
 }
 

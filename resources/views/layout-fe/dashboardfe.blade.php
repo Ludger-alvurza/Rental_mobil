@@ -34,60 +34,84 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
     <style>
         .container {
-    margin-top: 20px;
-}
+            margin-top: 20px;
+        }
 
-.select_box_section {
-    padding: 20px; /* Memberikan jarak di dalam */
-    border-radius: 10px; /* Membuat sudut menjadi melengkung */
-    box-shadow: none; /* Menghilangkan bayangan */
-}
+        .select_box_section {
+            padding: 20px;
+            /* Memberikan jarak di dalam */
+            border-radius: 10px;
+            /* Membuat sudut menjadi melengkung */
+            box-shadow: none;
+            /* Menghilangkan bayangan */
+        }
 
-.select_box_main {
-    display: flex; /* Menggunakan flexbox untuk tata letak */
-    flex-wrap: wrap; /* Membungkus elemen agar rapi */
-    justify-content: space-between; /* Mengatur jarak antar elemen secara rata */
-}
+        .select_box_main {
+            display: flex;
+            /* Menggunakan flexbox untuk tata letak */
+            flex-wrap: wrap;
+            /* Membungkus elemen agar rapi */
+            justify-content: space-between;
+            /* Mengatur jarak antar elemen secara rata */
+        }
 
-.select-outline {
-    flex: 1; /* Mengatur elemen agar memiliki ukuran yang sama */
-    min-width: 200px; /* Ukuran minimum agar tidak terlalu kecil */
-    margin-right: 15px; /* Jarak antar kolom */
-}
+        .select-outline {
+            flex: 1;
+            /* Mengatur elemen agar memiliki ukuran yang sama */
+            min-width: 200px;
+            /* Ukuran minimum agar tidak terlalu kecil */
+            margin-right: 15px;
+            /* Jarak antar kolom */
+        }
 
-.select-outline:last-child {
-    margin-right: 0; /* Menghapus margin pada kolom terakhir */
-}
+        .select-outline:last-child {
+            margin-right: 0;
+            /* Menghapus margin pada kolom terakhir */
+        }
 
-.form-control,
-.mdb-select {
-    width: 100%; /* Membuat input mengisi penuh area kontainer */
-    border: 1px solid #007BFF; /* Warna border */
-    border-radius: 5px; /* Sudut border melengkung */
-    padding: 10px; /* Jarak di dalam input */
-    font-size: 16px; /* Ukuran font */
-    transition: border-color 0.3s; /* Efek transisi saat fokus */
-}
+        .form-control,
+        .mdb-select {
+            width: 100%;
+            /* Membuat input mengisi penuh area kontainer */
+            border: 1px solid #007BFF;
+            /* Warna border */
+            border-radius: 5px;
+            /* Sudut border melengkung */
+            padding: 10px;
+            /* Jarak di dalam input */
+            font-size: 16px;
+            /* Ukuran font */
+            transition: border-color 0.3s;
+            /* Efek transisi saat fokus */
+        }
 
-.form-control:focus,
-.mdb-select:focus {
-    border-color: #0056b3; /* Warna border saat fokus */
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Efek bayangan saat fokus */
-}
+        .form-control:focus,
+        .mdb-select:focus {
+            border-color: #0056b3;
+            /* Warna border saat fokus */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            /* Efek bayangan saat fokus */
+        }
 
-.btn-danger {
-    background-color: #dc3545; /* Warna tombol merah */
-    border: none; /* Menghilangkan border default */
-    border-radius: 5px; /* Sudut tombol melengkung */
-    padding: 10px 20px; /* Jarak di dalam tombol */
-    font-size: 16px; /* Ukuran font */
-    transition: background-color 0.3s; /* Efek transisi saat hover */
-}
+        .btn-danger {
+            background-color: #dc3545;
+            /* Warna tombol merah */
+            border: none;
+            /* Menghilangkan border default */
+            border-radius: 5px;
+            /* Sudut tombol melengkung */
+            padding: 10px 20px;
+            /* Jarak di dalam tombol */
+            font-size: 16px;
+            /* Ukuran font */
+            transition: background-color 0.3s;
+            /* Efek transisi saat hover */
+        }
 
-.btn-danger:hover {
-    background-color: #c82333; /* Warna tombol saat hover */
-}
-
+        .btn-danger:hover {
+            background-color: #c82333;
+            /* Warna tombol saat hover */
+        }
     </style>
 </head>
 
@@ -211,10 +235,14 @@
                                 <div class="select_box_main">
                                     <div class="row">
                                         <div class="col-md-3 select-outline">
-                                            <input type="text" name="name" class="form-control" placeholder="Masukkan Nama Mobil" style="border: 1px solid #007BFF; border-radius: 5px; padding: 10px; font-size: 16px;" onkeydown="return event.key !== 'Enter';">
+                                            <input type="text" name="name" class="form-control"
+                                                placeholder="Masukkan Nama Mobil"
+                                                style="border: 1px solid #007BFF; border-radius: 5px; padding: 10px; font-size: 16px;"
+                                                onkeydown="return event.key !== 'Enter';">
                                         </div>
                                         <div class="col-md-3 select-outline">
-                                            <select name="type" class="mdb-select md-form md-outline colorful-select dropdown-primary">
+                                            <select name="type"
+                                                class="mdb-select md-form md-outline colorful-select dropdown-primary">
                                                 <option value="" disabled selected>Type</option>
                                                 <option value="keluarga">Keluarga</option>
                                                 <option value="sport">Sport</option>
@@ -222,7 +250,8 @@
                                             </select>
                                         </div>
                                         <div class="col-md-3 select-outline">
-                                            <select name="brand" class="mdb-select md-form md-outline colorful-select dropdown-primary">
+                                            <select name="brand"
+                                                class="mdb-select md-form md-outline colorful-select dropdown-primary">
                                                 <option value="" disabled selected>Pilih Brand</option>
                                                 <option value="toyota">Toyota</option>
                                                 <option value="honda">Honda</option>
@@ -248,9 +277,10 @@
                                                 <option value="Ferrari">Ferrari</option>
                                                 <option value="MClaren">MClaren</option>
                                             </select>
-                                        </div>                                        
+                                        </div>
                                         <div class="col-md-3 select-outline">
-                                            <select name="harga" class="mdb-select md-form md-outline colorful-select dropdown-primary">
+                                            <select name="harga"
+                                                class="mdb-select md-form md-outline colorful-select dropdown-primary">
                                                 <option value="" disabled selected>Harga</option>
                                                 <option value="1000000">Di bawah 1.000.000</option>
                                                 <option value="5000000">Di bawah 5.000.000</option>
@@ -258,7 +288,8 @@
                                             </select>
                                         </div>
                                         <div class="col-md-3">
-                                            <button type="button" class="btn btn-danger" id="searchBtn">Search Now</button>
+                                            <button type="button" class="btn btn-danger" id="searchBtn">Search
+                                                Now</button>
                                         </div>
                                     </div>
                                 </div>
@@ -287,13 +318,13 @@
                     <div class="col-sm-4">
                         <div class="icon_1"><img src="/assets-fe/images/icon-1.png"></div>
                         <h4 class="safety_text">SAFETY & SECURITY</h4>
-                        <p class="ipsum_text">Kami Menyediakan Mobil yang  aman dan nyaman untuk digunakan.
+                        <p class="ipsum_text">Kami Menyediakan Mobil yang aman dan nyaman untuk digunakan.
                         </p>
                     </div>
                     <div class="col-sm-4">
                         <div class="icon_1"><img src="/assets-fe/images/icon-2.png"></div>
                         <h4 class="safety_text">Online Booking</h4>
-                        <p class="ipsum_text">Anda Bisa Memesan  Mobil dengan Mudah dan Cepat.
+                        <p class="ipsum_text">Anda Bisa Memesan Mobil dengan Mudah dan Cepat.
                         </p>
                     </div>
                     <div class="col-sm-4">
@@ -326,6 +357,51 @@
     </div>
     <!-- copyright section end -->
     <!-- Javascript files-->
+    {{-- <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            AOS.init();
+        });
+    </script>
+    <script>
+        // Menginisialisasi AOS dan mengubah delay berdasarkan ukuran layar
+        window.addEventListener('load', function() {
+            // Memperbarui delay berdasarkan ukuran layar saat halaman dimuat
+            adjustAOSDelay();
+        });
+
+        window.addEventListener('resize', function() {
+            // Memperbarui delay saat ukuran layar berubah (misalnya jika pengguna mengubah ukuran jendela)
+            adjustAOSDelay();
+        });
+
+        function adjustAOSDelay() {
+            const width = window.innerWidth;
+
+            // Dapatkan semua elemen dengan atribut data-aos-delay
+            const elements = document.querySelectorAll('[data-aos-delay]');
+
+            elements.forEach((element, index) => {
+                // Sesuaikan delay berdasarkan lebar layar
+                if (width <= 768) { // Untuk perangkat mobile
+                    element.setAttribute('data-aos-delay', '0'); // Menghapus delay di mobile
+                } else {
+                    element.setAttribute('data-aos-delay', index * 200); // Mengatur delay normal di desktop
+                }
+            });
+
+            // Memaksa AOS untuk melakukan refresh
+            AOS.refresh();
+        }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Mengatur delay untuk elemen
+            adjustAOSDelay();
+
+            // Inisialisasi AOS setelah delay disesuaikan
+            AOS.init();
+        });
+    </script> --}}
     <script src="/assets-fe/js/jquery.min.js"></script>
     <script src="/assets-fe/js/popper.min.js"></script>
     <script src="/assets-fe/js/bootstrap.bundle.min.js"></script>
@@ -338,6 +414,18 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    {{-- <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const isMobile = window.innerWidth <= 768;
+            document.querySelectorAll('[data-aos-delay]').forEach((element, index) => {
+                const delay = isMobile ? 0 : index * 200;
+                element.setAttribute('data-aos-delay', delay);
+            });
+
+            // Memaksa AOS untuk melakukan refresh
+            AOS.refresh();
+        });
+    </script> --}}
     <script>
         $(function() {
 
@@ -350,10 +438,10 @@
         });
     </script>
     @stack('js')
-    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>
         AOS.init();
-    </script>
+    </script> --}}
 </body>
 
 </html>

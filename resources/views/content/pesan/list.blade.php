@@ -213,6 +213,8 @@
                                                                             <p><strong>Nama Mobil:</strong> {{ $row->name_mobil }}</p>
                                                                             <p><strong>Lama Sewa:</strong> {{ $row->lama_sewa }}</p>
                                                                             <p><strong>Keterangan:</strong> {{ $row->keterangan }}</p>
+                                                                            <p><strong>Booking Start:</strong> {{ $row->booking_start }}</p>
+                                                                            <p><strong>Booking End:</strong> {{ $row->booking_end }}</p>
                                                                         </div>
                                                                     </div>
                                                                 </div>

@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
 {
     $schedule->command('booking:reminder')->daily();
     $schedule->command('app:calculate-denda')->dailyAt('00:00');
+    $schedule->command('car:update-availability')->daily();
 }
 
 

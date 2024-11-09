@@ -175,6 +175,7 @@ Route::group([
 ], function () {
     Route::get('/',[ItemTrasactionController::class, 'index']);
     Route::get('/{id}/pdf',[ItemTrasactionController::class, 'printPDF']);
+    Route::get('/search', [ItemTrasactionController::class, 'search'])->name('itemT.search');
 });
 Route::middleware('auth')->get('/dashboard/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
 

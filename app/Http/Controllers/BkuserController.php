@@ -12,6 +12,7 @@ use App\Notifications\PaymentSuccess;
 use App\Notifications\PeminjamanSelesaiNotification;
 use App\Notifications\PesananDibatalkanMail;
 use App\Notifications\PesananTerverifikasiMail;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,33 +51,60 @@ class BkuserController extends Controller
     public function add(){
         return view('content.pesan.add');
     }
-    public function insert(Request $request){
+    public function insert(Request $request)
+    {
         try {
-        $validated = $request->validate([
-            'id_mobil' => 'required',
-            'id_user' => 'required',
-            'name' => 'required',
-            'no_plat' => 'required',
-            'booking_start' =>  'required',
-            'booking_end' => 'required',
-            'name_mobil' => 'required',
-            'lama_sewa' => 'required',
-            'keterangan' => 'required'
-        ]);
-        #sudah tervalidasi
-        $bkuser = new bkuser();
-        $bkuser->id_mobil = $request->id_mobil;
-        $bkuser->id_user = $request->id_user;
-        $bkuser->name = $request->name;
-        $bkuser->no_plat = $request->no_plat;
-        $bkuser->booking_start = $request->booking_start;
-        $bkuser->booking_end = $request->booking_end;
-        $bkuser->name_mobil = $request->name_mobil;
-        $bkuser->lama_sewa = $request->lama_sewa;
-        $bkuser->keterangan = $request->keterangan;
-        $bkuser->save();
-        Session::flash('success', 'Pesanan Anda Berhasil Silahkan Tunggu Verifikasi.');
+            $validated = $request->validate([
+                'id_mobil' => 'required',
+                'id_user' => 'required',
+                'name' => 'required',
+                'no_plat' => 'required',
+                'booking_start' => 'required|date',
+                'booking_end' => 'required|date|after_or_equal:booking_start',
+                'name_mobil' => 'required',
+                'lama_sewa' => 'required',
+                'keterangan' => 'required'
+            ]);
 
+            $conflictingDates = [];
+
+            $existingBooking = bkuser::where('id_mobil', $request->id_mobil)
+                ->where(function ($query) use ($request) {
+                    $query->whereBetween('booking_start', [$request->booking_start, $request->booking_end])
+                        ->orWhereBetween('booking_end', [$request->booking_start, $request->booking_end])
+                        ->orWhere(function ($query) use ($request) {
+                            $query->where('booking_start', '<=', $request->booking_start)
+                                ->where('booking_end', '>=', $request->booking_end);
+                        });
+                })
+                ->get();
+
+            if ($existingBooking->isNotEmpty()) {
+                foreach ($existingBooking as $booking) {
+                    $formattedStart = Carbon::parse($booking->booking_start)->format('d-m-Y');
+                    $formattedEnd = Carbon::parse($booking->booking_end)->format('d-m-Y');
+                    $conflictingDates[] = "Mulai: $formattedStart - Sampai: $formattedEnd";
+                }
+
+                $message = 'Pesanan tidak dapat dilakukan karena mobil sudah dipesan pada tanggal berikut: ' . implode(', ', $conflictingDates) . '. Silakan pilih tanggal lain.';
+                return response()->json(['message' => $message], 400);
+            }
+                        
+
+            // Insert data baru karena tidak ada bentrok
+            $bkuser = new bkuser();
+            $bkuser->id_mobil = $request->id_mobil;
+            $bkuser->id_user = $request->id_user;
+            $bkuser->name = $request->name;
+            $bkuser->no_plat = $request->no_plat;
+            $bkuser->booking_start = $request->booking_start;
+            $bkuser->booking_end = $request->booking_end;
+            $bkuser->name_mobil = $request->name_mobil;
+            $bkuser->lama_sewa = $request->lama_sewa;
+            $bkuser->keterangan = $request->keterangan;
+            $bkuser->save();
+
+            Session::flash('success', 'Pesanan Anda Berhasil. Silahkan Tunggu Verifikasi.');
             return redirect(url('/sewa-mobil'));
 
         } catch (ModelNotFoundException $e) {
@@ -87,6 +115,7 @@ class BkuserController extends Controller
             return redirect(url('/sewa-mobil'));
         }
     }
+
     public function edit(Request $request, $id)
     {
         $bkuser = bkuser::find($id);
