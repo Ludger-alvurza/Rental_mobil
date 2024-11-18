@@ -13,17 +13,17 @@ class UserSedder extends Seeder
      */
     public function run(): void
     {
-        // DB::table('users')->insert([
-        //     'name' => 'daniel',
-        //     'email' => 'dani@gmail.com',
-        //     'password' => bcrypt('12345678'), // Hash the password properly
-        //     'dob' => '2001-02-03', // Format the date properly as a string
-        //     'no_telepon' => '0845830843', // Enclose in quotes if it's a string
-        //     'alamat' => 'Jl. Kebon Jeruk'
-        // ]);
+        DB::table('users')->insert([
+            'name' => 'ludger',
+            'email' => 'lud.gerdus.p@mail.ukrim.ac.id',
+            'password' => bcrypt('12345678'), // Hash the password properly
+            'dob' => '2001-02-03', // Format the date properly as a string
+            'no_telepon' => '0845830843', // Enclose in quotes if it's a string
+            'alamat' => 'Jl. Kebon Jeruk'
+        ]);
         DB::table('users')->insert([
             'name' => 'Ludgerdus',
-            'email' => 'Lud@gmail.com',
+            'email' => 'ludgerdusl@gmail.com',
             'password' => bcrypt('12345678'), // Hash the password properly
             'dob' => '2001-02-03', // Format the date properly as a string
             'no_telepon' => '0845830843', // Enclose in quotes if it's a string

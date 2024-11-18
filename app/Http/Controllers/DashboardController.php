@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Jenssegers\Agent\Agent;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -54,11 +55,50 @@ class DashboardController extends Controller
 
     // Total pendapatan untuk tahun yang dipilih
     $totalUang = Transaction::whereYear('created_at', $selectedYear)->sum('total');
+    // Ambil data pesanan dengan kondisi pembatalan terverifikasi
+    $services = bkuser::where('pembatalan', 'Terverifikasi')->paginate(5);
 
-    // Ambil data lain yang dibutuhkan
+    // Array untuk menyimpan jumlah pemesanan per no_plat yang perlu di-service
+    $mobilForService = [];
+    $durations = []; // Array untuk menyimpan data durasi per no_plat
+
+    // Loop untuk menghitung durasi berdasarkan no_plat dan booking date range
+    foreach ($services as $booking) {
+        // Cek apakah booking_start dan booking_end ada dan valid
+        if ($booking->booking_start && $booking->booking_end) {
+            // Pastikan booking_start dan booking_end menjadi objek Carbon
+            $bookingStart = Carbon::parse($booking->booking_start);
+            $bookingEnd = Carbon::parse($booking->booking_end);
+
+            // Menghitung jumlah hari antara booking_end dan booking_start
+            $duration = $bookingEnd->diffInDays($bookingStart);
+        } else {
+            // Jika booking_start atau booking_end kosong, set $duration ke null
+            $duration = null;
+        }
+
+        // Simpan nilai duration untuk setiap booking dalam array durations berdasarkan no_plat
+        if ($duration !== null) {
+            // Jika no_plat sudah ada, jumlahkan durasi sebelumnya
+            if (isset($durations[$booking->no_plat])) {
+                $durations[$booking->no_plat] += $duration;
+            } else {
+                $durations[$booking->no_plat] = $duration;
+            }
+        }
+    }
+    // Loop melalui durasi dan cek apakah total durasinya lebih dari 30 hari
+    foreach ($durations as $no_plat => $totalDuration) {
+        if ($totalDuration >= 30) {
+            // Jika total durasi lebih dari 30 hari, anggap mobil perlu di-service
+            $mobilForService[$no_plat] = $totalDuration;
+        }
+    }
+    // dd($duration);
     $user = User::count();
     $userT = Auth::user();
     $pesanan = bkuser::where('pembatalan', 'Dipesan')->count();
+    $report = bkuser::where('pembatalan', 'Terverifikasi')->paginate(5);
     $syarat = SyaratS::first();
     $motor = Mobil::count();
     $kendaraan = Mobil::latest()->take(6)->get();
@@ -77,7 +117,10 @@ class DashboardController extends Controller
         'pendapatanBulanArray' => $pendapatanBulanArray,
         'bulanLabels' => $bulanLabels,
         'selectedYear' => $selectedYear,
-        'isMobile' => $isMobile
+        'isMobile' => $isMobile,
+        'report' => $report,
+        'mobilForService' => $mobilForService,
+        'duration' => $duration ?? null
     ]);
 }
 

@@ -3,19 +3,7 @@
 
 @section('content')
 <div class="col-12 mt-3">
-    <button type="button" class="btn btn-danger" onclick="showConfirmationModal()">Hapus Semua Data</button>
-
-    <!-- Modal Konfirmasi -->
-    <div id="confirmationModal" style="display: none;">
-        <div class="modal-overlay" onclick="closeConfirmationModal()"></div>
-        <div class="modal-content">
-            <h3>Konfirmasi Hapus Data</h3>
-            <p>Apakah Anda yakin ingin menghapus semua data ini? Ini akan berpengaruh terhadap pesanan user.</p>
-            <button type="button" class="btn btn-danger" id="delete-all">Ya, Hapus</button>
-            <button type="button" class="btn btn-secondary" onclick="closeConfirmationModal()">Batal</button>
-        </div>
-    </div>
-
+    <button type="button" class="btn btn-danger" id="delete-all">Hapus Semua Data</button>
     <style>
         .modal-overlay {
             position: fixed;

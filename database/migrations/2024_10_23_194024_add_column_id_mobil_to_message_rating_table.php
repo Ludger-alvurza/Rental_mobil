@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::table('message_rating', function (Blueprint $table) {
-        //     $table->unsignedBigInteger('id_mobil')->after('id');
+        Schema::table('message_rating', function (Blueprint $table) {
+            $table->unsignedBigInteger('id_mobil')->after('id');
 
-        //     $table->foreign('id_mobil')->references('id')->on('mobils')->onDelete('cascade');
-        // });
+            $table->foreign('id_mobil')->references('id')->on('mobils')->onDelete('cascade');
+        });
     }
 
     /**
@@ -23,10 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::table('message_rating', function (Blueprint $table) {
-        //     // Menghapus foreign key dan kolom id_mobil
-        //     $table->dropForeign(['id_mobil']);
-        //     $table->dropColumn('id_mobil');
-        // });
+        Schema::table('message_rating', function (Blueprint $table) {
+            // Menghapus foreign key dan kolom id_mobil
+            $table->dropForeign(['id_mobil']);
+            $table->dropColumn('id_mobil');
+        });
     }
 };

@@ -8,7 +8,7 @@
   </div>
   <hr class="horizontal dark mt-0">
   <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
-    <ul class="navbar-nav">
+    <ul class="navbar-nav" style="margin-left: -10px;">
       @can('superadmin')
       <li class="nav-item">
         <a class="nav-link  active" href="/dashboard">
@@ -311,11 +311,11 @@
           </div>
           <span class="nav-link-text ms-1">Sign Up</span>
         </a>
-      </li>
-    </ul> --}}
+      </li>--}}
+    </ul> 
   </div>
   <div class="sidenav-footer mx-3 ">
-    <div class="card card-background shadow-none card-background-mask-secondary" id="sidenavCard">
+    {{-- <div class="card card-background shadow-none card-background-mask-secondary" id="sidenavCard">
       <div class="full-background" style="background-image: url('../assets/img/curved-images/white-curved.jpg')"></div>
       <div class="card-body text-start p-3 w-100">
         <div class="icon icon-shape icon-sm bg-white shadow text-center mb-3 d-flex align-items-center justify-content-center border-radius-md">
@@ -327,7 +327,7 @@
           <a href="https://www.instagram.com/ludger_alvr26?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="btn btn-white btn-sm w-100 mb-0">Follow</a>
         </div>
       </div>
-    </div>
+    </div> --}}
     <a class="btn bg-gradient-primary mt-3 w-100" href="https://www.instagram.com/ludger_alvr26?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==">
       <i class="fab fa-instagram"></i> Dm InstagramDm Instagram
     </a>

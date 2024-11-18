@@ -84,88 +84,105 @@
                 @include('layout-fe.navbar')
             </div>
         </div>
-        <div class="table-responsive" style="padding: 20px;">
-            <h2>Profi edite</h2> <!-- Tambahin ini buat table responsive -->
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Alamat</th>
-                        <th>No Telepon</th>
-                        <th>Usia</th>
-                        <th>Jenis Kelamin</th>
-                        <th>Sebagai</th>
-                        <th>Edite Password</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{ auth()->user()->name }}</td>
-                        <td>{{ auth()->user()->alamat }}</td>
-                        <td>{{ auth()->user()->no_telepon }}</td>
-                        <td>{{ auth()->user()->age }} Tahun</td>
-                        <td>{{ auth()->user()->jk }}</td>
-                        <td>{{ auth()->user()->role }}</td>
-                        <td>
-                            <a class="nav-link me-2" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                                <i class="fas fa-key opacity-6 text-dark me-1"></i>
-                                Ubah Password
-                            </a>
-                            <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="changePasswordModalLabel">Ubah Password</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form method="post" action="{{ url('user/change-password') }}">
-                                                @csrf
-                                                <div class="form-group mb-3">
-                                                    <label for="old_password">Password Lama</label>
-                                                    <input required type="password" name="old_password" class="form-control @error('old_password') is-invalid @enderror">
-                                                    @error('old_password')
-                                                    <div class="invalid-feedback">
-                                                        {{$message}}
+        <div class="card"
+            style="padding: 100px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); background-color: #fff;">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Alamat</th>
+                            <th>No Telepon</th>
+                            <th>Usia</th>
+                            <th>Jenis Kelamin</th>
+                            <th>Sebagai</th>
+                            <th>Edit Password</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ auth()->user()->name }}</td>
+                            <td>{{ auth()->user()->alamat }}</td>
+                            <td>{{ auth()->user()->no_telepon }}</td>
+                            <td>{{ auth()->user()->age }} Tahun</td>
+                            <td>{{ auth()->user()->jk }}</td>
+                            <td>{{ auth()->user()->role }}</td>
+                            <td>
+                                <a class="nav-link me-2" href="#" data-bs-toggle="modal"
+                                    data-bs-target="#changePasswordModal">
+                                    <i class="fas fa-key opacity-6 text-dark me-1"></i>
+                                    Ubah Password
+                                </a>
+                                <div class="modal fade" id="changePasswordModal" tabindex="-1"
+                                    aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="changePasswordModalLabel">Ubah Password</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form method="post" action="{{ url('user/change-password') }}">
+                                                    @csrf
+                                                    <div class="form-group mb-3">
+                                                        <label for="old_password">Password Lama</label>
+                                                        <input required type="password" name="old_password"
+                                                            class="form-control @error('old_password') is-invalid @enderror">
+                                                        @error('old_password')
+                                                            <div class="invalid-feedback">
+                                                                {{ $message }}
+                                                            </div>
+                                                        @enderror
                                                     </div>
-                                                    @enderror
-                                                </div>
-                                                <div class="form-group mb-3">
-                                                    <label for="password">Password Baru</label>
-                                                    <input required type="password" name="password" class="form-control @error('password') is-invalid @enderror">
-                                                    @error('password')
-                                                    <div class="invalid-feedback">
-                                                        {{$message}}
+                                                    <div class="form-group mb-3">
+                                                        <label for="password">Password Baru</label>
+                                                        <input required type="password" name="password"
+                                                            class="form-control @error('password') is-invalid @enderror">
+                                                        @error('password')
+                                                            <div class="invalid-feedback">
+                                                                {{ $message }}
+                                                            </div>
+                                                        @enderror
                                                     </div>
-                                                    @enderror
-                                                </div>
-                                                <div class="form-group mb-3">
-                                                    <label for="password_confirmation">Konfirmasi Password Baru</label>
-                                                    <input required type="password" name="password_confirmation" class="form-control @error('password_confirmation') is-invalid @enderror">
-                                                    @error('password_confirmation')
-                                                    <div class="invalid-feedback">
-                                                        {{$message}}
+                                                    <div class="form-group mb-3">
+                                                        <label for="password_confirmation">Konfirmasi Password
+                                                            Baru</label>
+                                                        <input required type="password" name="password_confirmation"
+                                                            class="form-control @error('password_confirmation') is-invalid @enderror">
+                                                        @error('password_confirmation')
+                                                            <div class="invalid-feedback">
+                                                                {{ $message }}
+                                                            </div>
+                                                        @enderror
                                                     </div>
-                                                    @enderror
-                                                </div>
-                                                <button type="button" id="btn-submit" class="btn btn-primary">Simpan</button>
-                                            </form>
+                                                    <button type="submit" id="btn-submit"
+                                                        class="btn btn-primary">Simpan</button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <a href="" class="edit-profile-link" data-bs-toggle="modal" data-bs-target="#editModal">Edit Profil</a>
+
+        @if (auth()->user()->role === 'superadmin')
+            <a href="/user" class="edit-profile-link">Edit Profil</a>
+        @else
+            <a href="#" class="edit-profile-link" data-bs-toggle="modal" data-bs-target="#editModal">Edit
+                Profil</a>
+        @endif
         <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered"> <!-- Tambahin class modal-dialog-centered -->
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editModalLabel">Edit Data Pengguna</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <form action="">
@@ -190,7 +207,7 @@
 
     @include('layout-fe.footer')
     <!-- footer section end -->
-    <!-- copyright section start -->
+    {{-- <!-- copyright section start -->
     <div class="copyright_section">
         <div class="container">
             <div class="row">
@@ -200,7 +217,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <!-- copyright section end -->
     <!-- Javascript files-->
     @push('js')
@@ -216,10 +233,10 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
         <script>
-            $(function () {
-                $('#btn-submit').on('click', function (e) {
+            $(function() {
+                $('#btn-submit').on('click', function(e) {
                     e.preventDefault();
-            
+
                     Swal.fire({
                         title: "Konfirmasi",
                         text: "Apakah Anda yakin ingin mengubah password?",
@@ -232,32 +249,36 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $.ajax({
-                                url: '{{ url("user/change-password") }}',
+                                url: '{{ url('user/change-password') }}',
                                 type: 'POST',
                                 data: {
                                     _token: '{{ csrf_token() }}',
                                     old_password: $('input[name="old_password"]').val(),
                                     password: $('input[name="password"]').val(),
-                                    password_confirmation: $('input[name="password_confirmation"]').val()
+                                    password_confirmation: $(
+                                        'input[name="password_confirmation"]').val()
                                 },
-                                success: function (response) {
+                                success: function(response) {
                                     if (response.status === 'success') {
                                         Swal.fire('Sukses', response.message, 'success')
-                                            .then(function () {
-                                                window.location.reload(); // Reload halaman
+                                            .then(function() {
+                                                window.location
+                                                    .reload(); // Reload halaman
                                             });
                                     }
                                 },
-                                error: function (xhr) {
-                                    let errorMessage = 'Terjadi kesalahan saat mengubah password';
-            
+                                error: function(xhr) {
+                                    let errorMessage =
+                                        'Terjadi kesalahan saat mengubah password';
+
                                     if (xhr.status === 422) {
                                         const errors = xhr.responseJSON;
                                         if (errors.message) {
-                                            errorMessage = errors.message; // Pesan error dari backend
+                                            errorMessage = errors
+                                                .message; // Pesan error dari backend
                                         }
                                     }
-            
+
                                     Swal.fire('Gagal', errorMessage, 'error');
                                 }
                             });
@@ -265,7 +286,7 @@
                     });
                 });
             });
-            </script>            
+        </script>
         @if (Session::has('success'))
             <script>
                 toastr.success("{{ Session::get('success') }}");

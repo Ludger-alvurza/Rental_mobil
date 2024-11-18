@@ -20,7 +20,7 @@
                                     <th>Tahun</th>
                                     <th>Harga Per Hari</th>
                                     <th>Denda Per Hari</th>
-                                    <th>Stok</th>
+                                    <th>Ketersediaan</th>
                                     <th>Nomor Plat</th>
                                     <th>Action</th>
                                 </tr>
@@ -32,13 +32,28 @@
                                 @foreach ($mobils as $row)
                                     <tr>
                                         <td>{{ $i++ }}</td>
-                                        <td><img src="{{ route('storage', $row->gambar) }}" width="50px" height="50px"></td>
+                                        <td><img src="{{ route('storage', $row->gambar) }}" width="50px" height="50px">
+                                        </td>
                                         <td>{{ $row->name }}</td>
                                         <td>{{ $row->type }}</td>
                                         <td>{{ $row->year }}</td>
                                         <td>Rp {{ number_format($row->price_per_day, 0, ',', '.') }}</td>
                                         <td>Rp {{ $row->denda }}</td>
-                                        <td>{{ $row->availability }}</td>
+                                        <td>
+                                            <span
+                                                class="badge 
+                                                @if ($row->availability == 'Tersedia') bg-success 
+                                                @elseif ($row->availability == 'Sold Out') 
+                                                    bg-danger 
+                                                @else
+                                                    bg-secondary @endif">
+                                                @if ($row->availability == 'Sold Out')
+                                                    Tidak Tersedia
+                                                @else
+                                                    {{ $row->availability }}
+                                                @endif
+                                            </span>
+                                        </td>
                                         <td>{{ $row->no_plat }}</td>
                                         @can('admin')
                                             <td>
@@ -139,80 +154,83 @@
                                                                                     @enderror
                                                                                 </div>
                                                                                 <div class="form-group">
-                                                                                    <label for="brand">brand</label>
+                                                                                    <label for="brand">Brand</label>
                                                                                     <select name="brand"
                                                                                         class="form-control @error('brand') is-invalid @enderror">
+                                                                                        <!-- Opsi default yang dipilih, menggunakan nilai yang ada pada $row->brand -->
                                                                                         <option value="{{ $row->brand }}"
                                                                                             disabled selected>
                                                                                             {{ $row->brand }}</option>
+
+                                                                                        <!-- Opsi lainnya, pilih berdasarkan nilai old atau nilai yang ada di $row->brand -->
                                                                                         <option value="toyota"
-                                                                                            {{ old('brand') == 'toyota' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'toyota' ? 'selected' : '' }}>
                                                                                             Toyota</option>
                                                                                         <option value="honda"
-                                                                                            {{ old('brand') == 'honda' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'honda' ? 'selected' : '' }}>
                                                                                             Honda</option>
                                                                                         <option value="ford"
-                                                                                            {{ old('brand') == 'ford' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'ford' ? 'selected' : '' }}>
                                                                                             Ford</option>
                                                                                         <option value="chevrolet"
-                                                                                            {{ old('brand') == 'chevrolet' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'chevrolet' ? 'selected' : '' }}>
                                                                                             Chevrolet</option>
                                                                                         <option value="nissan"
-                                                                                            {{ old('brand') == 'nissan' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'nissan' ? 'selected' : '' }}>
                                                                                             Nissan</option>
                                                                                         <option value="volkswagen"
-                                                                                            {{ old('brand') == 'volkswagen' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'volkswagen' ? 'selected' : '' }}>
                                                                                             Volkswagen</option>
                                                                                         <option value="hyundai"
-                                                                                            {{ old('brand') == 'hyundai' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'hyundai' ? 'selected' : '' }}>
                                                                                             Hyundai</option>
                                                                                         <option value="kia"
-                                                                                            {{ old('brand') == 'kia' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'kia' ? 'selected' : '' }}>
                                                                                             Kia</option>
                                                                                         <option value="subaru"
-                                                                                            {{ old('brand') == 'subaru' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'subaru' ? 'selected' : '' }}>
                                                                                             Subaru</option>
                                                                                         <option value="mazda"
-                                                                                            {{ old('brand') == 'mazda' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'mazda' ? 'selected' : '' }}>
                                                                                             Mazda</option>
                                                                                         <option value="bmw"
-                                                                                            {{ old('brand') == 'bmw' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'bmw' ? 'selected' : '' }}>
                                                                                             BMW</option>
                                                                                         <option value="mercedes"
-                                                                                            {{ old('brand') == 'mercedes' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'mercedes' ? 'selected' : '' }}>
                                                                                             Mercedes-Benz</option>
                                                                                         <option value="audi"
-                                                                                            {{ old('brand') == 'audi' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'audi' ? 'selected' : '' }}>
                                                                                             Audi</option>
                                                                                         <option value="lexus"
-                                                                                            {{ old('brand') == 'lexus' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'lexus' ? 'selected' : '' }}>
                                                                                             Lexus</option>
                                                                                         <option value="porsche"
-                                                                                            {{ old('brand') == 'porsche' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'porsche' ? 'selected' : '' }}>
                                                                                             Porsche</option>
                                                                                         <option value="jaguar"
-                                                                                            {{ old('brand') == 'jaguar' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'jaguar' ? 'selected' : '' }}>
                                                                                             Jaguar</option>
                                                                                         <option value="land_rover"
-                                                                                            {{ old('brand') == 'land_rover' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'land_rover' ? 'selected' : '' }}>
                                                                                             Land Rover</option>
                                                                                         <option value="tesla"
-                                                                                            {{ old('brand') == 'tesla' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'tesla' ? 'selected' : '' }}>
                                                                                             Tesla</option>
                                                                                         <option value="volvo"
-                                                                                            {{ old('brand') == 'volvo' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'volvo' ? 'selected' : '' }}>
                                                                                             Volvo</option>
                                                                                         <option value="mitsubishi"
-                                                                                            {{ old('brand') == 'mitsubishi' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'mitsubishi' ? 'selected' : '' }}>
                                                                                             Mitsubishi</option>
                                                                                         <option value="Lamborghini"
-                                                                                            {{ old('brand') == 'Lamborghini' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'Lamborghini' ? 'selected' : '' }}>
                                                                                             Lamborghini</option>
                                                                                         <option value="Ferrari"
-                                                                                            {{ old('brand') == 'Ferrari' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'Ferrari' ? 'selected' : '' }}>
                                                                                             Ferrari</option>
                                                                                         <option value="MClaren"
-                                                                                            {{ old('brand') == 'MClaren' ? 'selected' : '' }}>
+                                                                                            {{ old('brand', $row->brand) == 'MClaren' ? 'selected' : '' }}>
                                                                                             MClaren</option>
                                                                                     </select>
                                                                                     @error('brand')
@@ -221,6 +239,7 @@
                                                                                         </div>
                                                                                     @enderror
                                                                                 </div>
+
                                                                                 <div class="form-group">
                                                                                     <label for="">Tahun</label>
                                                                                     <input type="text"

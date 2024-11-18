@@ -68,7 +68,7 @@
                                 <div class="gallery_img">
                                     <img src="{{ route('storage', $row->gambar) }}" alt="{{ $row->name }}">
                                 </div>
-                                <h3 class="types_text">{{ $row->name }} <br>{{ $row->availability }}</h3>
+                                <h3 class="types_text">{{ $row->name }}</h3>
                                 <p class="looking_text">Start per day Rp
                                     {{ number_format($row->price_per_day, 0, ',', '.') }}</p>
                                 <p style="font-family: 'Arial', sans-serif; font-size: 16px; color: black;">

@@ -25,15 +25,18 @@
                 <a class="nav-link" href="{{ url('/pesanan/keranjang') }}">Pesanan Anda</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal">Persyaratan Peminjaman</a>
+                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal">Persyaratan
+                    Peminjaman</a>
             </li>
             <!-- Add Modal Here -->
-            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="exampleModalLabel">Persyaratan Peminjaman</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <!-- Modal Content Goes Here -->
@@ -51,14 +54,15 @@
                     <a class="nav-link" href="{{ url('/logout') }}">Log Out</a>
                 </li>
                 <li class="nav-item {{ Request::is('user/profil') ? 'active' : '' }}">
-                    <a class="nav-link" href="/user/profil" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+                    <a class="nav-link text-center {{ strlen(auth()->user()->email) > 20 ? 'text-truncate' : '' }}"
+                        style="{{ strlen(auth()->user()->email) > 20 ? 'max-width: 150px;' : '' }}" href="/user/profil">
                         <i class="fa fa-user"></i> {{ auth()->user()->email }}
                     </a>
-                </li>                
+                </li>
             @endauth
             @can('superadmin')
                 <li class="nav-item {{ Request::is('dashboard') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{url('/dashboard')}}">Analytics</a>
+                    <a class="nav-link" href="{{ url('/dashboard') }}">Analytics</a>
                 </li>
             @endcan
         </ul>

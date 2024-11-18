@@ -115,8 +115,7 @@ Route::group([
     Route::post('/selesai/{id}', [BkuserController::class, 'konfirmasiPengembalian'])->name('admin.konfirmasiPengembalian');
     Route::post('/rating/store', [BkuserController::class, 'store'])->name('rating.store');
     Route::get('/batal/{id}', [BkuserController::class, 'batalForm'])->name('batal.admin');
-    
-    
+    Route::get('/search', [BkuserController::class, 'search'])->name('search');
 });
 
 Route::group([

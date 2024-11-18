@@ -6,7 +6,9 @@ use App\Jobs\PembatalanOtomatis;
 use App\Models\bkuser;
 use App\Models\ItemTransaction;
 use App\Models\MessageRating;
+use App\Models\Mobil;
 use App\Models\SyaratS;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Notifications\PaymentSuccess;
 use App\Notifications\PeminjamanSelesaiNotification;
@@ -18,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Jenssegers\Agent\Agent;
 
 class BkuserController extends Controller
 {
@@ -190,7 +193,6 @@ class BkuserController extends Controller
 
         if ($user && $user->role !== 'superadmin') {
             if ($request->pembatalan === 'Dibatalkan') {
-                // Kirim notifikasi ke admin
                 $admins = User::where('role', 'superadmin')->get();
                 foreach ($admins as $admin) {
                     $admin->notify(new PesananDibatalkanMail($bkuser));
@@ -322,49 +324,151 @@ private function redirectBasedOnRole($user)
         return response()->json(['message' => 'Status Pembayaran Lunas dan notifikasi telah dikirim'], 200);
     }
     public function detailPembayaran($id)
-{
-    $bkuser = bkuser::find($id);
-    $transaction = ItemTransaction::where('id_booking', $id)->first();
+    {
+        $bkuser = bkuser::find($id);
+        $transaction = ItemTransaction::where('id_booking', $id)->first();
 
-    if (!$bkuser) {
-        abort(404, 'Data tidak ditemukan');
+        if (!$bkuser) {
+            abort(404, 'Data tidak ditemukan');
+        }
+
+        return view('content.detailpembayaran.detail', compact('bkuser','transaction'));
     }
 
-    return view('content.detailpembayaran.detail', compact('bkuser','transaction'));
-}
 
+        
+    public function store(Request $request)
+    {
+        $request->validate([
+            'id_mobil' => 'required|exists:mobils,id',
+            'message' => 'required|integer|min:1|max:5',
+        ]);
 
+        // Simpan rating ke dalam tabel message_rating
+        MessageRating::create([
+            'id_mobil' => $request->id_mobil,
+            'message' => $request->rating,
+            // Tambah kolom lain jika ada, misal user_id jika perlu
+        ]);
+
+        return redirect()->back()->with('success', 'Rating telah diberikan.');
+    }
+    public function show($id)
+    {
+        // \Log::info("Detail booking accessed for ID: " . $id); // Log untuk debugging
+        $booking = bkuser::find($id);
+        
+        if (!$booking) {
+            // \Log::warning("Booking not found for ID: " . $id); // Log jika booking tidak ditemukan
+            abort(404);
+        }
+
+        // \Log::info("Booking found: " . json_encode($booking)); // Log booking yang ditemukan
+        return view('content.pesan.show', compact('booking'));
+    }
+    public function search(Request $request)
+    {
+        // Validasi inputan id
+        $noPlat = $request->input('id'); // Lo ganti jadi no_plat, karena ID di form itu adalah no plat
+        $booking = bkuser::where('id', $noPlat)->first(); // cari booking berdasarkan ID
+
+        $currentMonth = date('n'); // Bulan sekarang
+    $currentYear = date('Y');  // Tahun sekarang
     
-public function store(Request $request)
-{
-    $request->validate([
-        'id_mobil' => 'required|exists:mobils,id',
-        'message' => 'required|integer|min:1|max:5',
-    ]);
+    // Cek apakah user pilih tahun atau enggak, default ke tahun sekarang
+    $selectedYear = $request->input('year', $currentYear);
 
-    // Simpan rating ke dalam tabel message_rating
-    MessageRating::create([
-        'id_mobil' => $request->id_mobil,
-        'message' => $request->rating,
-        // Tambah kolom lain jika ada, misal user_id jika perlu
-    ]);
+    // Query pendapatan bulanan berdasarkan tahun yang dipilih
+    $pendapatanBulan = Transaction::selectRaw('SUM(total) as total, MONTH(created_at) as bulan')
+        ->whereYear('created_at', $selectedYear)
+        ->groupBy('bulan')
+        ->orderBy('bulan')
+        ->pluck('total', 'bulan')
+        ->toArray();
 
-    return redirect()->back()->with('success', 'Rating telah diberikan.');
-}
-public function show($id)
-{
-    // \Log::info("Detail booking accessed for ID: " . $id); // Log untuk debugging
-    $booking = bkuser::find($id);
-    
-    if (!$booking) {
-        // \Log::warning("Booking not found for ID: " . $id); // Log jika booking tidak ditemukan
-        abort(404);
+    // Daftar bulan
+    $bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+    // Inisialisasi array pendapatan bulanan (default 0 untuk setiap bulan)
+    $pendapatanBulanArray = array_fill(0, 12, 0);
+
+    // Masukkan total pendapatan ke bulan yang sesuai
+    foreach ($pendapatanBulan as $bulanIndex => $total) {
+        $pendapatanBulanArray[$bulanIndex - 1] = $total;
     }
 
-    // \Log::info("Booking found: " . json_encode($booking)); // Log booking yang ditemukan
-    return view('content.pesan.show', compact('booking'));
-}
+    // Cek apakah tahun yang dipilih adalah tahun sekarang
+    if ($selectedYear == $currentYear) {
+        // Jika tahun sekarang, tampilkan data hingga bulan saat ini
+        $bulanLabels = array_slice($bulan, 0, $currentMonth);
+        $pendapatanBulanArray = array_slice($pendapatanBulanArray, 0, $currentMonth);
+    } else {
+        // Jika tahun sebelumnya, tampilkan data dari Januari sampai Desember
+        $bulanLabels = $bulan;
+    }
 
+    // Total pendapatan untuk tahun yang dipilih
+    $totalUang = Transaction::whereYear('created_at', $selectedYear)->sum('total');
 
+    // Ambil data lain yang dibutuhkan
+    $services = bkuser::where('pembatalan', 'Terverifikasi')->paginate(5);
+
+    // Array untuk menyimpan jumlah pemesanan per no_plat yang perlu di-service
+    $mobilForService = [];
+
+    // Loop untuk menghitung durasi berdasarkan no_plat dan booking date range
+    foreach ($services as $booking) {
+        // Pastikan booking_start dan booking_end menjadi objek Carbon
+        $bookingStart = Carbon::parse($booking->booking_start);
+        $bookingEnd = Carbon::parse($booking->booking_end);
+
+        // Menghitung jumlah hari antara booking_end dan booking_start
+        $duration = $bookingEnd->diffInDays($bookingStart);
+
+        // Jika durasi pemesanan lebih dari 30 hari, anggap mobil perlu di-service
+        if ($duration > 30) {
+            // Menghitung berapa kali mobil tersebut sudah dipakai untuk pemesanan lebih dari 30 hari
+            $mobilForService[$booking->no_plat] = ($mobilForService[$booking->no_plat] ?? 0) + 1;
+        }
+    }
+    $user = User::count();
+    $userT = Auth::user();
+    $pesanan = bkuser::where('pembatalan', 'Dipesan')->count();
+    $report = bkuser::where('pembatalan', 'Terverifikasi')->paginate(5);
+    $syarat = SyaratS::first();
+    $motor = Mobil::count();
+    $kendaraan = Mobil::latest()->take(6)->get();
+    $agent = new Agent();
+    $isMobile = $agent->isMobile();
+
+        // Ambil data booking berdasarkan id
+        $booking = bkuser::find($request->id);
+
+        // Cek kalau data booking ditemukan
+        if ($booking) {
+            $report = bkuser::where('id', $noPlat)->paginate(10);
+            // Kalau ada, return ke view dengan data booking
+            return view('content.dashboard', [
+                'kendaraan' => $kendaraan,
+                'user' => $user,
+                'userT' => $userT,
+                'motor' => $motor,
+                'syarat' => $syarat,
+                'pesanan' => $pesanan,
+                'totalUang' => $totalUang,
+                'pendapatanBulanArray' => $pendapatanBulanArray,
+                'bulanLabels' => $bulanLabels,
+                'selectedYear' => $selectedYear,
+                'isMobile' => $isMobile,
+                'report' => $report,
+                'mobilForService' => $mobilForService,
+                'duration' => $duration,
+                'booking' => $booking
+            ]);
+        } else {
+            // Kalau gak ada, kasih notifikasi error atau redirect
+            return redirect()->back()->with('error', 'Booking tidak ditemukan.');
+        }
+    }
 
 }

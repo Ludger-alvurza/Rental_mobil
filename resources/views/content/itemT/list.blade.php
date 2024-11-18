@@ -8,10 +8,10 @@
     </form>
 
     <div class="col-12 mt-3">
-        <button type="button" class="btn btn-danger" onclick="showConfirmationModal()">Hapus Semua Data</button>
+        <button type="button" class="btn btn-danger" id="delete-all">Hapus Semua Data</button>
 
         <!-- Modal Konfirmasi -->
-        <div id="confirmationModal" style="display: none;">
+        {{-- <div id="confirmationModal" style="display: none;">
             <div class="modal-overlay" onclick="closeConfirmationModal()"></div>
             <div class="modal-content">
                 <h3>Konfirmasi Hapus Data</h3>
@@ -19,7 +19,7 @@
                 <button type="button" class="btn btn-danger" id="delete-all">Ya, Hapus</button>
                 <button type="button" class="btn btn-secondary" onclick="closeConfirmationModal()">Batal</button>
             </div>
-        </div>
+        </div> --}}
 
         <style>
             .modal-overlay {
@@ -132,18 +132,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        function showConfirmationModal() {
-            $('#confirmationModal').show();
-        }
-
-        function closeConfirmationModal() {
-            $('#confirmationModal').hide();
-        }
-
         $(document).ready(function() {
             $('#delete-all').click(function(e) {
                 e.preventDefault();
 
+                // Menampilkan konfirmasi SweetAlert
                 Swal.fire({
                     title: 'Apakah Anda yakin?',
                     text: "Data Rincian Biaya yang dihapus tidak dapat dikembalikan!",
@@ -155,6 +148,7 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        // Ajax request untuk hapus data
                         $.ajax({
                             url: '{{ route('table.clear') }}',
                             type: 'DELETE',
@@ -166,12 +160,9 @@
                                     'Terhapus!',
                                     'Data berhasil dihapus.',
                                     'success'
-                                ).then((result) => {
-                                    if (result.isConfirmed || result.dismiss ===
-                                        Swal.DismissReason.timer) {
-                                        location.reload(
-                                            true); // Force reload from server
-                                    }
+                                ).then(() => {
+                                    location.reload(
+                                    true); // Force reload from server
                                 });
                             },
                             error: function() {
@@ -187,6 +178,7 @@
             });
         });
     </script>
+
 
     @if (Session::has('success'))
         <script>
